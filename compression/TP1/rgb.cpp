@@ -53,13 +53,71 @@ OCTET* resizeColor(OCTET* in, int width, int height, int outWidth, int outHeight
   return out;
 }
 
+OCTET* toYCbCr(OCTET* in, int width, int height) {
+  OCTET *out;
+  allocation_tableau(out, OCTET, width * height * 3);
+
+  for (int i = 0; i < width; i++) {
+    for (int j = 0; j < height; j++) {
+      
+      at(out, width, height, i, j, RED) =
+	fmin(500, 
+	     at(in, width, height, i, j, RED) * 0.299f +
+	     at(in, width, height, i, j, GREEN) * 0.587f +
+	     at(in, width, height, i, j, BLUE) * 0.114f);
+
+      at(out, width, height, i, j, GREEN) =
+	fmin(500,
+	     128 -
+	     at(in, width, height, i, j, RED) * 0.168736f -
+	     at(in, width, height, i, j, GREEN) * 0.331264f +
+	     at(in, width, height, i, j, BLUE) * 0.5f);
+
+      at(out, width, height, i, j, BLUE) =
+	fmin(500, 
+	     128 +
+	     at(in, width, height, i, j, RED) * 0.5f -
+	     at(in, width, height, i, j, GREEN) * 0.418688f -
+	     at(in, width, height, i, j, BLUE) * 0.081312f);
+    }
+  }
+  return out;
+}
+
+OCTET* toRGB(OCTET* in, int width, int height) {
+  OCTET *out;
+  allocation_tableau(out, OCTET, width * height * 3);
+
+  for (int i = 0; i < width; i++) {
+    for (int j = 0; j < height; j++) {
+      
+      at(out, width, height, i, j, RED) = 
+	fmin(500,
+	     at(in, width, height, i, j, RED) +
+	     1.402f * (at(in, width, height, i, j, BLUE) - 128));
+
+      at(out, width, height, i, j, GREEN) =
+	fmin(500, 
+	     at(in, width, height, i, j, RED) -
+	     0.34414f * (at(in, width, height, i, j, GREEN) - 128) -
+	     0.71414f * (at(in, width, height, i, j, BLUE) - 128));
+
+      at(out, width, height, i, j, BLUE) =
+	fmin(500,
+	     at(in, width, height, i, j, RED) +
+	     1.772f * (at(in, width, height, i, j, GREEN) - 128));
+    }
+  }
+  return out;
+}
+
 
 void zizicaca(OCTET* in, OCTET* out, int width, int height) {
 
   int diff = 2;
   
-  OCTET* red = resizeImageChannel(in, width, height, width, height, RED);
-  OCTET* green = resizeImageChannel(in, width, height, width / diff, height / diff, GREEN);
+  OCTET* red = resizeImageChannel(in, width, height, width / diff , height / diff,  RED);
+  OCTET* green = resizeImageChannel(in, width, height, width,  height,  GREEN);
   OCTET* blue = resizeImageChannel(in, width, height, width / diff, height / diff, BLUE);
   
   for (int i = 0; i < width; i++) {
@@ -69,6 +127,19 @@ void zizicaca(OCTET* in, OCTET* out, int width, int height) {
       at(out, width, height, i, j, BLUE) = blue[i * width + j];
     }
   }
+}
+
+float psnr(OCTET* in, OCTET* compressed, int width, int height) {
+  double mse = 0;
+  for (int i = 0; i < width; i++) {
+    for (int j = 0; j < height; j++) {
+      mse += pow(at(in, width, height, i, j, RED) - at(compressed, width, height, i, j, RED), 2);
+      mse += pow(at(in, width, height, i, j, GREEN) - at(compressed, width, height, i, j, GREEN), 2);
+      mse += pow(at(in, width, height, i, j, BLUE) - at(compressed, width, height, i, j, BLUE), 2);
+    }
+  }
+  mse /= (width * height * 3);
+  return 10 * log10(pow(255, 2) /  mse);
 }
 
 int main(int argc, char **argv)
@@ -94,8 +165,13 @@ int main(int argc, char **argv)
 
   allocation_tableau(out, OCTET, width * height * 3);
 
+  OCTET* o1 = toYCbCr(in, width, height);
+  out = toRGB(o1, width, height);
+
   zizicaca(in, out, width, height);
-  std::cout << "zizi caca ok" << std::endl;
+  //zizicaca(o1, out, width, height);
+  //  out = toRGB(out, width, height);
+  std::cout << "psnr = " << psnr(in, out, width, height) << std::endl;
   ecrire_image_ppm(cNomImgEcrite, out, width, height);  
   return 0;
 }

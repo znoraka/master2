@@ -1,9 +1,9 @@
 #lang racket/gui
 
-(define cell-count-width 300)
-(define cell-count-height 150)
-(define cell-width 4)
-(define cell-height 4)
+(define cell-count-width 440)
+(define cell-count-height 300)
+(define cell-width 3)
+(define cell-height 3)
 
 (struct wall (i j right? up?))
 
