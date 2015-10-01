@@ -47,7 +47,6 @@ class QOpenGLContext;
 class QOpenGLPaintDevice;
 QT_END_NAMESPACE
 
-//! [1]
 class OpenGLWindow : public QWindow, protected QOpenGLFunctions
 {
     Q_OBJECT
@@ -61,6 +60,7 @@ public:
     virtual void initialize();
 
     void setAnimating(bool animating);
+
 public slots:
     void renderLater();
     void renderNow();
@@ -78,5 +78,4 @@ private:
     QOpenGLContext *m_context;
     QOpenGLPaintDevice *m_device;
 };
-//! [1]
 

@@ -19,14 +19,13 @@ using namespace std;
 
 GameWindow::GameWindow()
 {
-    camera = new Camera();
+    game = Game::getInstance();
 }
 
 void GameWindow::initialize()
 {
 
     timer.setInterval(framerate * 1000);
-    this->camera->initialize(devicePixelRatio(), width(), height(), -100.0, 100.0);
     timer.start();
     this->connect(&timer, SIGNAL(timeout()), this, SLOT(renderNow()));
 
@@ -34,22 +33,13 @@ void GameWindow::initialize()
 
 void GameWindow::render()
 {
-//    this->elapsed = timer.elapsed();
-
-//    if(this->elapsed > this->framerate) {
-//        this->render(this->elapsed);
-//        this->elapsed = 0;
-//        timer.start();
-//    }
-    this->render(0);
+    this->render(timer.interval());
 }
 
 void GameWindow::render(float delta)
 {
     glClear(GL_COLOR_BUFFER_BIT);
-    this->camera->update(delta);
-//    this->camera->rotate(1, 0, 0);
-
+    game->update(delta);
     ++m_frame;
 }
 
@@ -73,24 +63,6 @@ void GameWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Escape:
         qApp->exit();
         break;
-    case 'Z':
-        camera->scale(0.10f, 0.10f, 0);
-        break;
-    case 'S':
-        camera->scale(-0.10f, -0.10f, 0);
-        break;
-    case 'A':
-        camera->rotate(1.0f, 0, 0);
-        break;
-    case 'E':
-        camera->rotate(-1.0f, 0, 0);
-        break;
-    case 'Q':
-        camera->rotate(0, 1.0f, 0);
-        break;
-    case 'D':
-        camera->rotate(0, -1.0f, 0);
-        break;
-   }
+    }
     renderNow();
 }

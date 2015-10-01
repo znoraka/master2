@@ -8,10 +8,10 @@ class TriangleComponent : public Component
 public:
     TriangleComponent();
     static Pool<TriangleComponent *> *pool;
-    const std::string componentName() const override;
+    const QString componentName() const override;
     void release() override;
 
-    static const std::string name;
+    static const QString name;
 private:
 };
 

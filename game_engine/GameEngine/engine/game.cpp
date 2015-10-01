@@ -9,7 +9,9 @@ Game *Game::getInstance()
 
 void Game::update(float delta)
 {
-
+    if(!this->paused) {
+        this->currentScene->update(delta);
+    }
 }
 
 void Game::pause()

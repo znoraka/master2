@@ -8,12 +8,12 @@ class PositionComponent : public Component
 public:
     PositionComponent();
     static Pool<PositionComponent *> *pool;
-    const std::string componentName() const;
+    const QString componentName() const;
     void release() override;
 
     PositionComponent *init(float x, float y, float z);
 
-    static const std::string name;
+    static const QString name;
 private:
 
     float x, y, z;

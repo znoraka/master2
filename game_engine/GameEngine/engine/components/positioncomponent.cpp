@@ -1,13 +1,13 @@
 #include "positioncomponent.h"
 
-std::string const PositionComponent::name = "positioncomponent";
+QString const PositionComponent::name = "positioncomponent";
 Pool<PositionComponent *> *PositionComponent::pool = new Pool<PositionComponent*>([] () {return new PositionComponent();});
 
 PositionComponent::PositionComponent()
 {
 }
 
-const std::string PositionComponent::componentName() const
+const QString PositionComponent::componentName() const
 {
     return PositionComponent::name;
 }

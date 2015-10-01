@@ -9,29 +9,29 @@ Entity::Entity()
 
 Entity *Entity::addComponent(Component *component)
 {
-    removeComponent(component);
+    removeComponent(component->componentName());
     component->setEntity(this);
     components[component->componentName()] = component;
     return this;
 }
 
-void Entity::removeComponent(Component *component)
+void Entity::removeComponent(const QString componentName)
 {
-    Component* c = components[component->componentName()];
-    if(c != nullptr) {
-        c->release();
+    QHash<QString, Component*>::iterator i = components.find(componentName);
+    if(i != components.end()) {
+        i.value()->release();
     }
 }
 
-Component *Entity::getComponent(const std::string componentId)
+Component *Entity::getComponent(const QString componentId)
 {
     return components[componentId];
 }
 
 void Entity::release()
 {
-    std::for_each(components.begin(), components.end(), [] (std::pair<const std::string, Component*> p) {
-        p.second->release();
-    });
+    foreach (Component *var, components) {
+        var->release();
+    }
     pool->release(this);
 }

@@ -3,7 +3,7 @@
 
 #include "openglwindow.h"
 #include "QTimer"
-#include "camera.h"
+#include "game.h"
 
 class GameWindow : public OpenGLWindow
 {
@@ -17,33 +17,13 @@ public:
 
     void keyPressEvent(QKeyEvent *event);
 
-    void displayTriangles();
-    void displayLines();
-    void displayTrianglesC();
-    void displayPoints();
-    void displayTrianglesTexture();
-
-    void displayColor(float);
-
-    void loadMap(QString localPath);
-
 private:
 
     int m_frame;
     QImage m_image;
-    Camera *camera;
-
-
-    int carte=1;
-
-    int etat = 0;
-    float rotX = -45.0;
-    float rotY = -45.0;
-    float ss = 1.0f;
+    Game *game;
     float framerate = 1.0f / 60.0f;
-    float deltaTime = 0;
-    float elapsed = 0;
-    float lastUpdate = 0;
+
     QTimer timer;
 };
 

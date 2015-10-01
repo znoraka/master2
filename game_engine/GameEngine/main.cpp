@@ -23,11 +23,6 @@
 using namespace std;
 
 
-void createWindow(Camera* camera, float framerate) {
-
-}
-
-
 int main(int argc, char **argv)
 {
     srand(time(NULL));
@@ -50,6 +45,9 @@ int main(int argc, char **argv)
             addComponent(PositionComponent::pool->obtain());
 
     e->getComponent(PositionComponent::name);
+
+    qDebug() << "releasing";
+
     e->release();
 
     return app.exec();

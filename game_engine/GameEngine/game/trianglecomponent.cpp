@@ -1,13 +1,13 @@
 #include "trianglecomponent.h"
 
-std::string const TriangleComponent::name = "trianglecomponent";
+QString const TriangleComponent::name = "trianglecomponent";
 Pool<TriangleComponent *> *TriangleComponent::pool = new Pool<TriangleComponent*>([] () {return new TriangleComponent();});
 
 TriangleComponent::TriangleComponent()
 {
 }
 
-const std::string TriangleComponent::componentName() const
+const QString TriangleComponent::componentName() const
 {
     return TriangleComponent::name;
 }
