@@ -9,7 +9,7 @@ Game *Game::getInstance()
 
 void Game::update(float delta)
 {
-    if(!this->paused) {
+    if(!this->paused && this->currentScene != nullptr && currentScene->isReady()) {
         this->currentScene->update(delta);
     }
 }
@@ -32,4 +32,5 @@ void Game::setScene(Scene *scene)
 Game::Game()
 {
     paused = false;
+    this->currentScene = nullptr;
 }

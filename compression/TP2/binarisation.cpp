@@ -189,7 +189,7 @@ int main(int argc, char **argv)
   //  allocation_tableau(out, OCTET, width * height);
   OCTET* binarise = binarisation(in, width, height);
   OCTET* binariseVote = binarisationVote(in, width, height, S);
-  OCTET* binariseNiblack = niblack(in, width, height, S * 2.5);
+  OCTET* binariseNiblack = niblack(in, width, height, fmin(width / 8.0f, 20));
   OCTET* squareniblack = binarisationVote(binariseNiblack, width, height, S);
   OCTET* binariseMixte = mixte(in, width, height);
   

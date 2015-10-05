@@ -3,6 +3,7 @@
 
 #include <QHash>
 #include <QString>
+#include <QVector>
 
 #include "engine/components/component.h"
 
@@ -14,6 +15,7 @@ public:
     Entity *addComponent(Component *component);
     void removeComponent(const QString componentName);
     Component *getComponent(const QString componentId);
+    QVector<Component *> getComponents();
     static Pool<Entity *> *pool;
     void release();
 

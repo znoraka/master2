@@ -2,9 +2,12 @@
 #define COMPONENT_H
 
 #include <QString>
+
 #include "../tools/pool.cpp"
+#include "engine/systems/system.h"
 
 class Entity;
+class System;
 
 class Component
 {
@@ -12,7 +15,9 @@ class Component
     friend class Pool<Component *>;
 public:
     virtual const QString componentName() const;
+    virtual const QString systemName() const;
     virtual ~Component();
+    virtual System *instantiateSystem();
     static Pool<Component *> *pool;
 
     Entity *getEntity() const;

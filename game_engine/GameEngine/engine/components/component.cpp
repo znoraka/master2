@@ -12,9 +12,19 @@ const QString Component::componentName() const
     return Component::name;
 }
 
+const QString Component::systemName() const
+{
+    return System::name;
+}
+
 Component::~Component()
 {
 
+}
+
+System *Component::instantiateSystem()
+{
+    return new System();
 }
 
 void Component::setEntity(Entity *entity)

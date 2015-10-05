@@ -28,6 +28,15 @@ Component *Entity::getComponent(const QString componentId)
     return components[componentId];
 }
 
+QVector<Component *> Entity::getComponents()
+{
+    QVector<Component *> v;
+    foreach (Component *c, components) {
+        v.push_back(c);
+    }
+    return v;
+}
+
 void Entity::release()
 {
     foreach (Component *var, components) {

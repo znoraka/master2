@@ -11,7 +11,7 @@ void Camera::initialize(qreal ratio, qreal width, qreal height, qreal near, qrea
     glClearColor(0.0, 0.0, 0.0, 0.0);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-1.0, 1.0, -1.0, 1.0, near, far);
+    glOrtho(-10.0, 10.0, -10.0, 10.0, near, far);
 }
 
 void Camera::rotate(float x, float y, float z)

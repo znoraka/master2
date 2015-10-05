@@ -37,18 +37,7 @@ int main(int argc, char **argv)
     w->show();
     w->setAnimating(true);
 
-    Entity *e = Entity::pool->obtain();
-    e->
-            addComponent(Component::pool->obtain())->
-            addComponent(PositionComponent::pool->obtain()->init(0, 0, 0))->
-            addComponent(TriangleComponent::pool->obtain())->
-            addComponent(PositionComponent::pool->obtain());
-
-    e->getComponent(PositionComponent::name);
-
-    qDebug() << "releasing";
-
-    e->release();
+    Game::getInstance()->setScene(new Scene());
 
     return app.exec();
 }

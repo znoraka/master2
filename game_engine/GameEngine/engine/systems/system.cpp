@@ -6,7 +6,23 @@ System::System()
 {
 }
 
-const QString System::componentName() const
+void System::update(float delta)
+{
+
+}
+
+void System::addComponent(Component *component)
+{
+    this->components.insert(component);
+}
+
+void System::removeComponent(Component *component)
+{
+    component->release();
+    this->components.remove(component);
+}
+
+const QString System::systemName() const
 {
     return System::name;
 }

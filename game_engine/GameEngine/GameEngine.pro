@@ -24,7 +24,8 @@ SOURCES += \
     game/trianglecomponent.cpp \
     engine/tools/pool.cpp \
     engine/components/positioncomponent.cpp \
-    engine/systems/system.cpp
+    engine/systems/system.cpp \
+    engine/systems/trianglesystem.cpp
 
 HEADERS  += \
     engine/camera.h \
@@ -37,7 +38,8 @@ HEADERS  += \
     game/trianglecomponent.h \
     engine/tools/pool.h \
     engine/components/positioncomponent.h \
-    engine/systems/system.h
+    engine/systems/system.h \
+    engine/systems/trianglesystem.h
 
 FORMS    +=
 QMAKE_CXXFLAGS += -std=c++11
