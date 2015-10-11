@@ -11,6 +11,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <iostream>
+
+#define RED 1
+#define GREEN 2
+#define BLUE 3
 
 #define allocation_tableau(nom, type, nombre) \
 if( (nom = (type*) calloc (nombre, sizeof(type) ) ) == NULL ) \
