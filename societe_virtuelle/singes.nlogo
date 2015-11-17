@@ -3,6 +3,8 @@ globals [
   tick-count
   days
   turtle-id
+  total-tick-count
+  saluts-count
 ]
 
 turtles-own [
@@ -15,6 +17,9 @@ turtles-own [
   combat-ability
   name
   mates
+  salut-count
+  salut-count-list
+  last-saluts-mean
 ]
 
 to setup
@@ -29,8 +34,11 @@ to setup-globals
   set tick-count 0
   set days 0
   set turtle-id 0
+  set total-tick-count 0
+  set saluts-count 0
 end
 
+;; plus le groupe est grand, plus la force apportée par un salut doit être faible
 to setup-monkeys
   create-turtles initial-monkeys
     [
@@ -47,8 +55,13 @@ to setup-monkeys
       set min-strength 0
       set has-token? true
       set name word "turtle-" turtle-id
+      set-current-plot "Strength"
       create-temporary-plot-pen name
+      set-current-plot "Saluts"
+      create-temporary-plot-pen name
+      set salut-count 0
       set turtle-id turtle-id + 1
+      set salut-count-list (list 0)
     ]
 end
 
@@ -64,6 +77,7 @@ to go
   ask turtles [check-strength]
   ask turtles [decrease-leader-strength-memory]
   ask turtles [plot-strength]
+  ask turtles [plot-saluts]
   time
   tick
 end
@@ -113,13 +127,15 @@ end
 
 to salut [monkey]
   set has-token? false
-  ask monkey [set strength strength + strength-per-salut]
+  set saluts-count (saluts-count + 1)
+  ask monkey [set strength strength + strength-per-salut / 20]
+  ask monkey [set salut-count (salut-count + 1)]
   ask patch-here [set pcolor blue]
 end
 
 to decrease-leader-strength-memory
-  set leader-strength leader-strength - 10
-  set strength strength - 1
+  set leader-strength leader-strength - 5
+  set strength strength - 2
 end
 
 to fight
@@ -134,7 +150,7 @@ to fight
           ask patch-here [set pcolor red]
           ifelse random combat-ability + strength > random [combat-ability] of monkey + [strength] of monkey
           [
-            set strength strength + strength-per-salut * 4
+            set strength strength + strength-per-salut * 4 / 20
           ]
           [
             ask monkey [set strength strength - strength / 4]
@@ -158,23 +174,47 @@ end
 
 to time
   set tick-count (tick-count + 1)
+  set total-tick-count (total-tick-count + 1)
   if tick-count > ticks-per-day
   [
+    ask turtles [
+      set last-saluts-mean ((mean salut-count-list) / saluts-count) * 100
+    ]
     set tick-count 0
     ask turtles [set has-token? true]
+    ask turtles [set salut-count-list lput salut-count salut-count-list]
+    ask turtles [
+      if length salut-count-list > 10
+      [
+        set salut-count-list butfirst salut-count-list
+      ]
+    ]
+    ask turtles [set salut-count 0]
+    set saluts-count 0
     ask turtles [
       set strength strength - 1
-      set leader-strength leader-strength - 10
+      set leader-strength leader-strength - 1
 
     ]
   ]
 end
 
 to plot-strength
+  set-current-plot "Strength"
   set-current-plot-pen name
   set-plot-pen-color color
-  plot strength
+  set-plot-x-range (total-tick-count - 1000) total-tick-count
+  plotxy total-tick-count strength
 end
+
+to plot-saluts
+  set-current-plot "Saluts"
+  set-current-plot-pen name
+  set-plot-pen-color color
+  set-plot-x-range (total-tick-count - 1000) total-tick-count
+  plot last-saluts-mean
+end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 288
@@ -246,17 +286,17 @@ initial-monkeys
 initial-monkeys
 2
 100
-9
+32
 1
 1
 NIL
 HORIZONTAL
 
 PLOT
-7
-268
-276
-467
+746
+11
+1015
+210
 Strength
 weeks
 Saluts
@@ -264,7 +304,7 @@ Saluts
 52.0
 0.0
 350.0
-true
+false
 true
 "set-plot-y-range 0 1000" ""
 PENS
@@ -277,12 +317,29 @@ SLIDER
 strength-per-salut
 strength-per-salut
 0
-50
-9
+1000
+92
 1
 1
 NIL
 HORIZONTAL
+
+PLOT
+746
+213
+1015
+413
+Saluts
+weeks
+Saluts
+0.0
+100.0
+0.0
+100.0
+false
+true
+"" ""
+PENS
 
 @#$#@#$#@
 ## WHAT IS IT?
