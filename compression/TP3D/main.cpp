@@ -4,36 +4,106 @@
 #include <sstream>
 #include <vector>
 #include <iostream>
+#include <functional>
+#include <algorithm>
 
 class Point {
 public:
-  Point(float x, float y, float z, bool cart = true) {
+  Point(double x, double y, double z, bool cart = true) {
     set(x, y, z, cart);
   }
 
-  void set(float x, float y, float z, bool cart = true) {
+  void set(double x, double y, double z, bool cart = true) {
     if(cart) {
       this->x = x;
       this->y = y;
       this->z = z;
 
       this->r = sqrt(x*x + y*y + z*z);
-      this->phi = atan(y / x);
-      this->theta = acos(z / r);
+      this->theta = atan2(y, x);
+      this->phi = acos(z / r);
       
     } else {
       this->r = x;
       this->theta = y;
       this->phi = z;
 
-      this->x = r * sin(theta) * cos(phi);
+      this->x = r * cos(theta) * sin(phi);
       this->y = r * sin(theta) * sin(phi);
-      this->z = r * cos(theta);
+      this->z = r * cos(phi);
     }
   }
   
-  float x, y, z;
-  float r, theta, phi;
+  double x, y, z;
+  double r, theta, phi;
+};
+
+class Bin {
+public:
+  Bin(double rmin, double rmax) {
+    this->rmin = rmin;
+    this->rmax = rmax;
+  }
+
+  void addPoint(Point *p) {
+    points.push_back(p);
+  }
+
+  void normalize() {
+    double norme = rmax - rmin;
+    for(auto p : points) {
+      double r = (p->r - rmin) / norme;
+      p->set(r, p->theta, p->phi, false);
+    }
+  }
+
+  void normalizeInv() {
+    double norme = rmax - rmin;
+    for(auto p : points) {
+      double r = p->r * norme + rmin;
+      p->set(r, p->theta, p->phi, false);
+    }
+  }
+
+  void insertMessage(bool message, double alpha, double delta) {
+    normalize();
+
+    auto binAvg = [=] () {
+      double avg = 0;
+      for(auto i : points) {
+	avg += i->r;
+      }
+      return avg / (double) points.size();
+    };
+
+    double d = 0.01 * (double) points.size();
+    float k = 1;
+    while(binAvg() > 0.5 + (message?1:-1) * alpha != message) {
+      for(auto i : points) {
+    	i->set(pow(i->r, k) , i->theta, i->phi, false);
+      }
+      k += (message?-1:1) * delta;
+    }
+    normalizeInv();
+
+    // std::cout << message << "" << readMessage() << std::endl;
+  }
+
+  bool readMessage() {
+    normalize();
+
+    auto binAvg = [=] () {
+      double avg = 0;
+      for(auto i : points) {
+	avg += i->r;
+      }
+      return avg / (double) points.size();
+    };
+    return binAvg() > 0.5;
+  }
+
+  double rmin, rmax;
+  std::vector<Point*> points;
 };
 
 class Face {
@@ -50,6 +120,20 @@ public:
 class Maillage {
 public:
   Maillage() {}
+
+  void exportMaillage(std::string path) {
+    std::ofstream file(path);
+    file << "OFF\n";
+    file << points.size() << " " << indexes.size() << " " << 0;
+    for(auto i : points) {
+      file << "\n" << i->x << " " << i->y << " " << i->z;
+    }
+    for(auto i : indexes) {
+      file << "\n" << i[0] << " " << i[1] << " " << i[2] << " " << i[3];
+    }
+    file.close();
+  }
+  
   void lireMaillage(std::string path) {
     std::ifstream f(path.c_str());
 
@@ -108,85 +192,106 @@ public:
     p->z /= points.size();
     return p;
   }
+
+  std::vector<bool> readMessage(int binCount) {
+    std::vector<bool> message;
+    
+    Point *p = calculG();
+    this->center(p);
+
+    std::vector<Bin*> bins;
+    double rmin = points[0]->r;
+    double rmax = points[0]->r;
+
+    for(auto p : points) {
+      if(p->r > rmax) rmax = p->r;
+      if(p->r < rmin) rmin = p->r;
+    }
+    double step = (rmax - rmin) / (double) binCount;
+  
+    for (int i = 0; i < binCount; i++) {
+      bins.push_back(new Bin(step * i + rmin, step * (i+1) + rmin));
+    }
+
+    for(auto p : points) {
+      bins[fmin(binCount - 1, (p->r - rmin) / step)]->addPoint(p);
+    }
+
+    for (int i = 0; i < binCount; i++) {
+      message.push_back(bins[i]->readMessage());
+    }
+    
+    return message;
+  }
+
+  void insertMessage(std::vector<bool> message, double alpha, double delta) {
+    Point *p = calculG();
+    this->center(p);
+
+    int n = message.size();
+    std::vector<Bin*> bins;
+    double rmin = points[0]->r;
+    double rmax = points[0]->r;
+
+    for(auto p : points) {
+      if(p->r > rmax) rmax = p->r;
+      if(p->r < rmin) rmin = p->r;
+    }
+    double step = (rmax - rmin) / (double) n;
+  
+    for (int i = 0; i < n; i++) {
+      bins.push_back(new Bin(step * i + rmin, step * (i+1) + rmin));
+    }
+
+    for(auto p : points) {
+      // std::cout << (p->r - rmin) / step << std::endl;
+      bins[fmin(n - 1, (p->r - rmin) / step)]->addPoint(p);
+    }
+
+    for (int i = 0; i < n; i++) {
+      bins[i]->insertMessage(message[i], alpha, delta);
+    }
+  }
   
   std::vector<Point *> points;
   std::vector<std::vector<int>> indexes;
   std::vector<Face *> faces;
 };
 
-class Bin {
-public:
-  Bin(double rmin, double rmax) {
-    this->rmin = rmin;
-    this->rmax = rmax;
-  }
-
-  void addPoint(Point *p) {
-    points.push_back(p);
-  }
-
-  void normalize() {
-    float norme = rmax - rmin;
-    for(auto p : points) {
-      float r = p->r / norme;
-      p->set(r, p->theta, p->phi, false);
-    }
-  }
-
-  void normalizeInv() {
-    float norme = rmax - rmin;
-    for(auto p : points) {
-      float r = p->r * norme;
-      p->set(r, p->theta, p->phi, false);
-    }
-  }
-
-  void insertMessage(int message) {
-    //TOOD
-  }
-
-  double rmin, rmax;
-  std::vector<Point*> points;
-};
-
-
 int main() {
+  srand(time(NULL));
   Maillage m;
   m.lireMaillage("../TP3D/bunny.off");
-  // std::cout << m.calculG()->x << ", " << m.calculG()->y << ", " << m.calculG()->z << std::endl;
 
-  Point *p = m.calculG();
+  int n = 128;
 
-  m.center(p);
-
-  int n = 16;
-  std::vector<Bin> bins;
-  float rmin = m.points[0]->r;
-  float rmax = m.points[0]->r;
-
-  for(auto p : m.points) {
-    if(p->r > rmax) rmax = p->r;
-    if(p->r < rmin) rmin = p->r;
-  }
-  
-  float step = (rmax - rmin) / (float) n;
-  // std::cout << step << std::endl;
-  
+  std::vector<bool> message;
   for (int i = 0; i < n; i++) {
-    bins.push_back(Bin(step * i - rmin, step * (i+1) - rmin));
+    message.push_back(rand() % 2 == 0);
   }
 
-  for(auto p : m.points) {
-    // std::cout << (p->r - rmin) / step << std::endl;
-    bins[(p->r - rmin) / step].addPoint(p);
-  }
+  m.insertMessage(message, 0.1, 0.9);
+   m.exportMaillage("../TP3D/out.off");
 
-  int cpt = 0;
-  for (int i = 0; i < bins.size(); i++) {
-    cpt += bins[i].points.size();
-    std::cout << i << " " << bins[i].points.size() << std::endl;
+  Maillage m2;
+  m2.lireMaillage("../TP3D/out.off");
+  for(auto i : message) {
+    std::cout << i;
   }
+  auto res = m.readMessage(n);
+  std::cout << std::endl;
+  for(auto i : res) {
+    std::cout << i;
+  }
+  std::cout << std::endl;
 
-  // std::cout << cpt << std::endl;
+  // int cpt = 0;
+  // for (int i = 0; i < bins.size(); i++) {
+  //   cpt += bins[i].points.size();
+  //   std::cout << i << " " << bins[i].points.size() << std::endl;
+  // }
+
+  
+
   return 0;
 }
