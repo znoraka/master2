@@ -6,6 +6,8 @@
 #include <iostream>
 #include <functional>
 #include <algorithm>
+#include <stdio.h>
+#include <string.h>
 
 class Point {
 public:
@@ -258,33 +260,63 @@ public:
   std::vector<Face *> faces;
 };
 
-int main() {
-  srand(time(NULL));
-  Maillage m;
-  m.lireMaillage("../TP3D/bunny.off");
+int main(int argc, char *argv[]) {
 
-  int n = 128;
+  auto f = [=](std::string s) {
+    for (int i = 0; i < argc; i++) {
+      if(strcmp(argv[i], s.c_str()) == 0) {
+	return i + 1;
+      }
+    }
+    return -1;
+  };
 
-  std::vector<bool> message;
-  for (int i = 0; i < n; i++) {
-    message.push_back(rand() % 2 == 0);
+  auto parseMessage = [](std::string s) {
+    std::vector<bool> vec;
+    for (int i = 0; i < s.size(); i++) {
+      vec.push_back(s[i] == '1');
+    }
+    return vec;
+  };
+  
+  if(argc == 1) {
+    std::cout << "encoding : " << std::endl;
+    std::cout << "\t-i <input file>" << std::endl;
+    std::cout << "\t-o <output file> [default ./out.off]" << std::endl;
+    std::cout << "\t-m <binary message>" << std::endl;
+    std::cout << "\t-a <alpha> [default 0.1]" << std::endl;
+    std::cout << "\t-d <delta> [default 0.9]" << std::endl;
+
+    std::cout << "decoding : " << std::endl;
+    std::cout << "\t-r <file to decode>" << std::endl;
+    std::cout << "\t-l <message length>" << std::endl;
+    
   }
+  
+  if(f("-r") == -1) {
+    char *inputFile = argv[f("-i")];
+    const char *outputFile = ((f("-o") == -1)?std::string("./out.off").c_str():argv[f("-o")]);
+    auto message = parseMessage(argv[f("-m")]);
+    double alpha = ((f("-a") == -1)?0.1:std::stod(argv[f("-a")]));
+    double delta = ((f("-d") == -1)?0.1:std::stod(argv[f("-d")]));
 
-  m.insertMessage(message, 0.1, 0.9);
-   m.exportMaillage("../TP3D/out.off");
-
-  Maillage m2;
-  m2.lireMaillage("../TP3D/out.off");
-  for(auto i : message) {
-    std::cout << i;
+    Maillage m;
+    m.lireMaillage(inputFile);
+    m.insertMessage(message, alpha, delta);
+    m.exportMaillage(outputFile);
+    
+  } else {
+    
+    Maillage m;
+    m.lireMaillage(argv[f("-r")]);
+    
+    auto res = m.readMessage(std::atoi(argv[f("-l")]));
+    for(auto i : res) {
+      std::cout << i;
+  
+    }
+    std::cout << std::endl;
   }
-  auto res = m.readMessage(n);
-  std::cout << std::endl;
-  for(auto i : res) {
-    std::cout << i;
-  }
-  std::cout << std::endl;
-
   // int cpt = 0;
   // for (int i = 0; i < bins.size(); i++) {
   //   cpt += bins[i].points.size();
