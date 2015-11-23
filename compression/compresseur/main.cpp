@@ -42,10 +42,16 @@ int main(int argc, char *argv[])
   lire_image_ppm(cNomImgLue, in, width * height);
 
   OCTET *ycrcb = toYCbCr(in, width, height);
-  auto dico = extractDico(ycrcb, width, height, 12);
+  // auto dico = extractDico(ycrcb, width, height, 12);
+  auto dico = extractDicoKmeans(ycrcb, width, height, 5);
   auto out = encodeFromDico(dico, ycrcb, width, height);
   ecrire_image_ppm(outString, toRGB(out, width, height), width, height);
   std::cout << psnr(in, toRGB(out, width, height), width, height) << std::endl;
+
+  // int K = 4;
+  // point v = colorToPoint(in, width, height);
+  // point c = lloyd(v, width * height * 3, K);
+  // print_eps(v, width * height * 3, c, K);
   
   return 0;
 }

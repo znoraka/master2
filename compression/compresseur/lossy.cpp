@@ -56,6 +56,45 @@ std::vector<std::vector<OCTET>> extractDico(OCTET *in, int width, int height, in
   // }
 }
 
+std::vector<std::vector<OCTET>> extractDicoKmeans(OCTET *in, int width, int height, int dicoSize) {
+  int K = pow(2, dicoSize);
+  point v = colorToPoint(in, width, height);
+  point c = lloyd(v, width * height, K);
+  std::vector<std::vector<long>> sums;
+  std::vector<int> counts;
+  std::vector<std::vector<OCTET>> dico;
+
+  for (int i = 0; i < 3; i++) {
+    sums.push_back(std::vector<long>());
+    dico.push_back(std::vector<OCTET>());
+  }
+
+  for (int i = 0; i < K; i++) {
+    counts.push_back(0);
+    for (int j = 0; j < 3; j++) {
+      sums[j].push_back(0);
+      dico[j].push_back(0);
+      
+    }
+  }
+
+  for (int i = 0; i < width * height; i++) {
+    point p = v + i;
+    counts[p->group]++;
+    sums[0][p->group] += p->x;
+    sums[1][p->group] += p->y;
+    sums[2][p->group] += p->z;
+  }
+
+  for (int i = 0; i < K; i++) {
+    dico[0][i] = sums[0][i] / counts[i];
+    dico[1][i] = sums[1][i] / counts[i];
+    dico[2][i] = sums[2][i] / counts[i];
+  }
+  
+  return dico;
+}
+
 OCTET* toYCbCr(OCTET* in, int width, int height) {
   OCTET *out;
   allocation_tableau(out, OCTET, width * height * 3);
