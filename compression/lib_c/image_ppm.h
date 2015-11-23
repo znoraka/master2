@@ -3,7 +3,6 @@
 // Description     :
 // Created On      : Tue Mar 31 13:26:36 2005
 // ----------------------------------------------------------------------------
-
 #ifndef IMAGE_PPM
 #define IMAGE_PPM
 

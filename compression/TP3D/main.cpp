@@ -298,7 +298,7 @@ int main(int argc, char *argv[]) {
     const char *outputFile = ((f("-o") == -1)?std::string("./out.off").c_str():argv[f("-o")]);
     auto message = parseMessage(argv[f("-m")]);
     double alpha = ((f("-a") == -1)?0.1:std::stod(argv[f("-a")]));
-    double delta = ((f("-d") == -1)?0.1:std::stod(argv[f("-d")]));
+    double delta = ((f("-d") == -1)?0.9:std::stod(argv[f("-d")]));
 
     Maillage m;
     m.lireMaillage(inputFile);
