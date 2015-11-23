@@ -46,7 +46,6 @@ void huffman(OCTET *in, int width, int height) {
   HuffCodeMap codes;
   GenerateCodes(root, HuffCode(), codes);
   delete root;
-
   std::stack<bool> *vec = new std::stack<bool>();
   for (int i = 0; i < width * height; i++) {
     HuffCode c = codes.find(in[i])->second;
@@ -162,11 +161,11 @@ int main(int argc, char **argv)
   int width, height;
 	
   OCTET *in, *out;
-  lire_nb_lignes_colonnes_image_pgm(cNomImgLue, &width, &height);
-  allocation_tableau(in, OCTET, width * height);
-  lire_image_pgm(cNomImgLue, in, width * height);
+  lire_nb_lignes_colonnes_image_ppm(cNomImgLue, &width, &height);
+  allocation_tableau(in, OCTET, width * height * 3);
+  lire_image_ppm(cNomImgLue, in, width * height);
 
-  codagePredictif(in, width, height);
-
+  // codagePredictif(in, width, height);
+  huffman(in, width, height);
   return 0;
 }

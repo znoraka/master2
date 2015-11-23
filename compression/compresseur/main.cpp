@@ -35,6 +35,8 @@ int main(int argc, char *argv[])
   sscanf (argv[1],"%s",cNomImgLue);
 
   int width, height;
+
+  int dicoSize = 5;
 	
   OCTET *in;
   lire_nb_lignes_colonnes_image_ppm(cNomImgLue, &width, &height);
@@ -43,15 +45,17 @@ int main(int argc, char *argv[])
 
   OCTET *ycrcb = toYCbCr(in, width, height);
   // auto dico = extractDico(ycrcb, width, height, 12);
-  auto dico = extractDicoKmeans(ycrcb, width, height, 5);
-  auto out = encodeFromDico(dico, ycrcb, width, height);
-  ecrire_image_ppm(outString, toRGB(out, width, height), width, height);
-  std::cout << psnr(in, toRGB(out, width, height), width, height) << std::endl;
+  auto dico = extractDicoKmeans(in, width, height, dicoSize);
+  auto out = encodeFromDico(dico, in, width, height);
+  ecrire_image_ppm(outString, out, width, height);
+  std::cout << psnr(in, out, width, height) << std::endl;
 
   // int K = 4;
   // point v = colorToPoint(in, width, height);
   // point c = lloyd(v, width * height * 3, K);
   // print_eps(v, width * height * 3, c, K);
+
+  writeDicoToFile(dico, out, width, height, "out.dat", dicoSize);
   
   return 0;
 }

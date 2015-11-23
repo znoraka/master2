@@ -151,26 +151,104 @@ OCTET* toRGB(OCTET* in, int width, int height) {
   return out;
 }
 
+
+
 OCTET *encodeFromDico(std::vector<std::vector<OCTET>> dico, OCTET *in, int width, int height) {
   OCTET *out;
   allocation_tableau(out, OCTET, width * height * 3);
 
-  auto getValue = [=](std::vector<OCTET> vec, OCTET o) {
-    int best = 255;
-    for(auto i : vec) {
-      if(abs(i - o) < abs(best - o)) {
+  auto dist2 = [=](int a, int b) {
+    double x = in[a * 3 + 0] - dico[0][b];
+    double y = in[a * 3 + 1] - dico[1][b];
+    double z = in[a * 3 + 2] - dico[2][b];
+    return x*x + y*y + z*z;
+  };
+
+  auto getValue = [=](int index) {
+    int best = 0;
+
+    for (int i = 0; i < dico[0].size(); i++) {
+      if(dist2(index, i) < dist2(index, best)) {
 	best = i;
       }
     }
+
     return best;
   };
 
-  for (int i = 0; i < width; i++) {
-    for (int j = 0; j < height; j++) {
-      at(out, width, height, i, j, Y) = getValue(dico[0], at(in, width, height, i, j, Y));
-      at(out, width, height, i, j, Cr) = getValue(dico[1], at(in, width, height, i, j, Cr));
-      at(out, width, height, i, j, Cb) = getValue(dico[2], at(in, width, height, i, j, Cb));
+  for (int i = 0; i < width * height; i++) {
+    auto value = getValue(i);
+    out[i * 3 + 0] = dico[0][value];
+    out[i * 3 + 1] = dico[1][value];
+    out[i * 3 + 2] = dico[2][value];
+  }
+
+  return out;
+}
+
+void writeDicoToFile(std::vector<std::vector<OCTET>> dico, OCTET* in, int width, int height, std::string path, int dicoValueSize) {
+  std::ofstream file(path);
+  
+  auto toBitSet = [=] (int value) {
+    std::vector<bool> s;
+    
+    while (value != 0) {
+      s.push_back(value % 2);
+      value /= 2;
+    }
+
+    while (s.size() < dicoValueSize) s.push_back(0);
+    return s;
+  };
+
+    auto dist2 = [=](int a, int b) {
+    double x = in[a * 3 + 0] - dico[0][b];
+    double y = in[a * 3 + 1] - dico[1][b];
+    double z = in[a * 3 + 2] - dico[2][b];
+    return x*x + y*y + z*z;
+  };
+
+  auto getValue = [=](int index) {
+    int best = 0;
+
+    for (int i = 0; i < dico[0].size(); i++) {
+      if(dist2(index, i) < dist2(index, best)) {
+	best = i;
+      }
+    }
+
+    return best;
+  };
+
+  auto toChar = [=](std::stack<bool> *vec) {
+      char c = 0;
+      for (int i = 0; i < 8; i++) {
+	if(vec->top()) c += pow(2, 7 - i);
+	vec->pop();
+      }
+      return c;
+    };
+
+
+  for(auto vec : dico) {
+    for(auto i : vec) {
+      file << i;
     }
   }
-  return out;
+    
+  std::stack<bool> *s = new std::stack<bool>();
+  for (int i = 0; i < width * height; i++) {
+    auto value = getValue(i);
+    auto vec = toBitSet(value);
+
+    assert(vec.size() == dicoValueSize);
+
+    for(auto v : vec) {
+      s->push(v);
+    }
+    if(s->size() > 8) {
+      file << toChar(s);
+    }
+  }
+  file.close();
 }
