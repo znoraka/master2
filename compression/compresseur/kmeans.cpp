@@ -119,7 +119,7 @@ point lloyd(point pts, int len, int n_cluster)
 	p->group = min_i;
       }
     }
-  } while (changed > (len >> 10)); /* stop when 99.9% of points are good */
+  } while (changed > (len >> 1)); /* stop when 99.9% of points are good */
  
   for_n { c->group = i; }
  

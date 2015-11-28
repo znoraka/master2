@@ -17,7 +17,7 @@
 #define GREEN 2
 #define BLUE 3
 
-#define Y 1
+#define Yc 1
 #define Cr 2
 #define Cb 3
 

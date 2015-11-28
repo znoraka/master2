@@ -41,7 +41,7 @@ std::vector<std::vector<OCTET> > extractDico(OCTET *in, int width, int height, i
     }
   }
   std::vector<std::vector<OCTET> > dico;
-  dico.push_back(clamp(Y, pow(2, dicoSize * 0.5), histos[0]));
+  dico.push_back(clamp(Yc, pow(2, dicoSize * 0.5), histos[0]));
   dico.push_back(clamp(Cr, pow(2, dicoSize * 0.25), histos[1]));
   dico.push_back(clamp(Cb, pow(2, dicoSize * 0.25), histos[2]));
 
@@ -57,6 +57,33 @@ std::vector<std::vector<OCTET> > extractDico(OCTET *in, int width, int height, i
 }
 
 std::vector<std::vector<OCTET> > extractDicoKmeans(OCTET *in, int width, int height, int dicoSize) {
+  int K = pow(2, dicoSize);
+  point v = colorToPoint(in, width, height);
+  point c = lloyd(v, width * height, K);
+
+  std::vector<std::vector<OCTET> > dico;
+
+  for (int i = 0; i < 3; i++) {
+    dico.push_back(std::vector<OCTET>());
+  }
+
+  for (int i = 0; i < K; i++) {
+    for (int j = 0; j < 3; j++) {
+      dico[j].push_back(0);
+    }
+  }
+
+  for (int i = 0; i < K; i++) {
+    point p = c + i;
+    dico[0][i] = p->x;
+    dico[1][i] = p->y;
+    dico[2][i] = p->z;
+  }
+  
+  return dico;
+}
+/*
+std::vector<std::vector<OCTET> > extractDicoKmeansMlpack(OCTET *in, int width, int height, int dicoSize) {
   int K = pow(2, dicoSize);
   point v = colorToPoint(in, width, height);
   point c = lloyd(v, width * height, K);
@@ -77,12 +104,36 @@ std::vector<std::vector<OCTET> > extractDicoKmeans(OCTET *in, int width, int hei
     }
   }
 
-  for (int i = 0; i < width * height; i++) {
-    point p = v + i;
-    counts[p->group]++;
-    sums[0][p->group] += p->x;
-    sums[1][p->group] += p->y;
-    sums[2][p->group] += p->z;
+  arma::mat data(3, width * height);
+  int cpt = 0;
+  for (int i = 0; i < width; i++) {
+    for (int j = 0; j < height; j++) {
+      data.at(0, cpt) = at(in, width, height, i, j, RED);
+      data.at(1, cpt) = at(in, width, height, i, j, GREEN);
+      data.at(2, cpt) = at(in, width, height, i, j, BLUE);
+      cpt++;
+    }
+  }
+
+  // The number of clusters we are getting.
+  size_t clusters = K;
+
+  // The assignments will be stored in this vector.
+  arma::Col<size_t> assignments;
+
+  // Initialize with the default arguments.
+  KMeans<> k;
+  k.Cluster(data, clusters, assignments);
+
+  for(auto i : assignments) {
+    std::cout << i << std::endl;
+  }
+
+ for (int i = 0; i < width * height; i++) {
+    counts[assignments[i]]++;
+    sums[0][assignments[i]] += in[i * 3];
+    sums[1][assignments[i]] += in[i * 3 + 1];
+    sums[2][assignments[i]] += in[i * 3 + 2];
   }
 
   for (int i = 0; i < K; i++) {
@@ -90,9 +141,10 @@ std::vector<std::vector<OCTET> > extractDicoKmeans(OCTET *in, int width, int hei
     dico[1][i] = sums[1][i] / counts[i];
     dico[2][i] = sums[2][i] / counts[i];
   }
-  
+ 
   return dico;
-}
+}*/
+
 
 OCTET* toYCbCr(OCTET* in, int width, int height) {
   OCTET *out;
@@ -113,7 +165,7 @@ OCTET* toYCbCr(OCTET* in, int width, int height) {
       // if(u > 255 || u < 0) std::cout << "u = " << u << std::endl;
       // if(v > 255 || v < 0) std::cout << "v = " << v << std::endl;
 
-      at(out, width, height, i, j, Y) = y;
+      at(out, width, height, i, j, Yc) = y;
       at(out, width, height, i, j, Cr) = u;
       at(out, width, height, i, j, Cb) = v;
     }
@@ -129,7 +181,7 @@ OCTET* toRGB(OCTET* in, int width, int height) {
   for (int i = 0; i < width; i++) {
     for (int j = 0; j < height; j++) {
 
-      double y = at(in, width, height, i, j, Y);
+      double y = at(in, width, height, i, j, Yc);
       double u = at(in, width, height, i, j, Cr) - 128;
       double v = at(in, width, height, i, j, Cb) - 128;
 
@@ -292,13 +344,13 @@ std::vector<OCTET> resizeImageChannel(OCTET* in, int width, int height, int dW, 
     long avg = 0;
     for (int i = x; i < w + x; i++) {
       for (int j = y; j < h + y; j++) {
-	avg += in[i * height + j];
+	avg += in[i * width + j];
       }
     }
     avg /= w * h;
     for (int i = x; i < w + x; i++) {
       for (int j = y; j < h + y; j++) {
-	in[i * height + j] = avg;
+	in[i * width + j] = avg;
       }
     }
     return in;
@@ -318,7 +370,6 @@ std::vector<OCTET> resizeImageChannel(OCTET* in, int width, int height, int dW, 
 
   for (int i = 0; i < width; i++) {
     for (int j = 0; j < height; j++) {
-      // out[i * height * 3 + j * 3 + color - 1] = temp[i * height + j];
       at(&out[0], width, height, i, j, color) = at(&temp[0], width, height, i, j, 0);
     }
   }

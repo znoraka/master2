@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 
   int width, height;
 
-  int dicoSize = 3;
+  int dicoSize = 5;
 	
   OCTET *in;
   lire_nb_lignes_colonnes_image_ppm(cNomImgLue, &width, &height);
