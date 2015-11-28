@@ -8,10 +8,12 @@
 
 #include "kmeans.h"
 #include "image_ppm.h"
+#include "lossless.h"
 
 std::vector<std::vector<OCTET>> extractDico(OCTET *in, int width, int height, int dicoSize = 8);
 std::vector<std::vector<OCTET>> extractDicoKmeans(OCTET *in, int width, int height, int dicoSize = 8);
 OCTET *encodeFromDico(std::vector<std::vector<OCTET>> dico, OCTET *in, int width, int height);
 OCTET *toYCbCr(OCTET* in, int width, int height);
 OCTET *toRGB(OCTET* in, int width, int height);
-void writeDicoToFile(std::vector<std::vector<OCTET>> dico, OCTET* encodedImage, int width, int height, std::string path, int dicoValueSize);
+void writeDicoToStream(std::vector<std::vector<OCTET>> dico, OCTET* encodedImage, int width, int height, std::ostream& stream, int dicoValueSize);
+std::vector<OCTET> decodeFromDico(std::ifstream& stream);

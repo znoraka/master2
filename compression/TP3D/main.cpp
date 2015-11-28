@@ -309,7 +309,6 @@ int main(int argc, char *argv[]) {
     
     Maillage m;
     m.lireMaillage(argv[f("-r")]);
-    
     auto res = m.readMessage(std::atoi(argv[f("-l")]));
     for(auto i : res) {
       std::cout << i;
@@ -322,8 +321,6 @@ int main(int argc, char *argv[]) {
   //   cpt += bins[i].points.size();
   //   std::cout << i << " " << bins[i].points.size() << std::endl;
   // }
-
-  
 
   return 0;
 }

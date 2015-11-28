@@ -44,18 +44,19 @@ int main(int argc, char *argv[])
   lire_image_ppm(cNomImgLue, in, width * height);
 
   OCTET *ycrcb = toYCbCr(in, width, height);
-  // auto dico = extractDico(ycrcb, width, height, 12);
+  // // auto dico = extractDico(ycrcb, width, height, 12);
+
   auto dico = extractDicoKmeans(in, width, height, dicoSize);
   auto out = encodeFromDico(dico, in, width, height);
   ecrire_image_ppm(outString, out, width, height);
   std::cout << psnr(in, out, width, height) << std::endl;
+  std::ofstream file("out.dat");
+  writeDicoToStream(dico, ycrcb, width, height, file, dicoSize);
+  file.close();
 
-  // int K = 4;
-  // point v = colorToPoint(in, width, height);
-  // point c = lloyd(v, width * height * 3, K);
-  // print_eps(v, width * height * 3, c, K);
-
-  writeDicoToFile(dico, out, width, height, "out.dat", dicoSize);
+  std::ifstream stream("out.dat", std::ifstream::binary);
+  decodeFromDico(stream);
   
+  // writeRLEToFile(out, width, height, "out.dat");
   return 0;
 }

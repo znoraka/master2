@@ -1,9 +1,9 @@
 #include "lossy.h"
 
-std::vector<std::vector<OCTET>> extractDico(OCTET *in, int width, int height, int dicoSize) {
+std::vector<std::vector<OCTET> > extractDico(OCTET *in, int width, int height, int dicoSize) {
   //4 bits for channel Y = 2^4 = 16 values
   //2 bits for Cr and Cb = 4 values;
-  std::vector<std::vector<int>> histos;
+  std::vector<std::vector<int> > histos;
   
   auto clamp = [=](int channel, int values, std::vector<int> histo) {
     std::vector<OCTET> vec;
@@ -40,7 +40,7 @@ std::vector<std::vector<OCTET>> extractDico(OCTET *in, int width, int height, in
       histos[2][at(in, width, height, i, j, BLUE)]++;
     }
   }
-  std::vector<std::vector<OCTET>> dico;
+  std::vector<std::vector<OCTET> > dico;
   dico.push_back(clamp(Y, pow(2, dicoSize * 0.5), histos[0]));
   dico.push_back(clamp(Cr, pow(2, dicoSize * 0.25), histos[1]));
   dico.push_back(clamp(Cb, pow(2, dicoSize * 0.25), histos[2]));
@@ -56,13 +56,13 @@ std::vector<std::vector<OCTET>> extractDico(OCTET *in, int width, int height, in
   // }
 }
 
-std::vector<std::vector<OCTET>> extractDicoKmeans(OCTET *in, int width, int height, int dicoSize) {
+std::vector<std::vector<OCTET> > extractDicoKmeans(OCTET *in, int width, int height, int dicoSize) {
   int K = pow(2, dicoSize);
   point v = colorToPoint(in, width, height);
   point c = lloyd(v, width * height, K);
-  std::vector<std::vector<long>> sums;
+  std::vector<std::vector<long> > sums;
   std::vector<int> counts;
-  std::vector<std::vector<OCTET>> dico;
+  std::vector<std::vector<OCTET> > dico;
 
   for (int i = 0; i < 3; i++) {
     sums.push_back(std::vector<long>());
@@ -74,7 +74,6 @@ std::vector<std::vector<OCTET>> extractDicoKmeans(OCTET *in, int width, int heig
     for (int j = 0; j < 3; j++) {
       sums[j].push_back(0);
       dico[j].push_back(0);
-      
     }
   }
 
@@ -153,7 +152,7 @@ OCTET* toRGB(OCTET* in, int width, int height) {
 
 
 
-OCTET *encodeFromDico(std::vector<std::vector<OCTET>> dico, OCTET *in, int width, int height) {
+OCTET *encodeFromDico(std::vector<std::vector<OCTET> > dico, OCTET *in, int width, int height) {
   OCTET *out;
   allocation_tableau(out, OCTET, width * height * 3);
 
@@ -186,22 +185,8 @@ OCTET *encodeFromDico(std::vector<std::vector<OCTET>> dico, OCTET *in, int width
   return out;
 }
 
-void writeDicoToFile(std::vector<std::vector<OCTET>> dico, OCTET* in, int width, int height, std::string path, int dicoValueSize) {
-  std::ofstream file(path);
-  
-  auto toBitSet = [=] (int value) {
-    std::vector<bool> s;
-    
-    while (value != 0) {
-      s.push_back(value % 2);
-      value /= 2;
-    }
-
-    while (s.size() < dicoValueSize) s.push_back(0);
-    return s;
-  };
-
-    auto dist2 = [=](int a, int b) {
+void writeDicoToStream(std::vector<std::vector<OCTET> > dico, OCTET* in, int width, int height, std::ostream& stream, int dicoValueSize) {
+  auto dist2 = [=](int a, int b) {
     double x = in[a * 3 + 0] - dico[0][b];
     double y = in[a * 3 + 1] - dico[1][b];
     double z = in[a * 3 + 2] - dico[2][b];
@@ -210,45 +195,104 @@ void writeDicoToFile(std::vector<std::vector<OCTET>> dico, OCTET* in, int width,
 
   auto getValue = [=](int index) {
     int best = 0;
-
     for (int i = 0; i < dico[0].size(); i++) {
       if(dist2(index, i) < dist2(index, best)) {
 	best = i;
       }
     }
-
     return best;
   };
 
-  auto toChar = [=](std::stack<bool> *vec) {
-      char c = 0;
-      for (int i = 0; i < 8; i++) {
-	if(vec->top()) c += pow(2, 7 - i);
-	vec->pop();
-      }
-      return c;
-    };
+  stream << (unsigned char)dicoValueSize;
+  short w = width, h = height;
+  stream << (unsigned char) (w / 256);
+  stream << (unsigned char) (w % 256);
+  stream << (unsigned char) (h / 256);
+  stream << (unsigned char) (h % 256);
+  
+  for(auto vec : dico) {
+    for(auto i : vec) {
+      std::cout << (int) i << std::endl;
+      stream << i;
+    }
+  }
 
+  OCTET last = 0;
+  OCTET count = 0;
+  
+  for (int i = 0; i < width * height; i++) {
+    auto value = getValue(i);
+
+    if(count == 255) {
+      stream << count;
+      stream << last;
+      count = 1;
+    } else if(count == 0) {
+      last = value;
+      count = 1;
+    } else {
+      if(last != value) {
+	stream << count;
+	stream << last;
+	count = 1;
+	last = value;
+      } else {
+	count++;
+      }
+    }
+  }
+  stream.flush();
+}
+
+std::vector<OCTET> decodeFromDico(std::ifstream& stream) {
+  int size = stream.get();
+  int width = stream.get() * 256 + stream.get();
+  int height = stream.get() * 256 + stream.get();
+
+  std::cout << "width = " << width << std::endl;
+  std::cout << "height = " << height << std::endl;
+  std::vector<std::vector<unsigned char> > dico;
+
+  std::cout << "size = " << size << std::endl;
+
+  for (int i = 0; i < 3; i++) {
+    std::vector<unsigned char> vec;
+    for (int j = 0; j < pow(2, size); j++) {
+      vec.push_back(stream.get());
+    }    
+    dico.push_back(vec);
+  }
 
   for(auto vec : dico) {
     for(auto i : vec) {
-      file << i;
+      std::cout << (int) i << std::endl;
     }
   }
+
+  std::cout << "**************************" << std::endl;
+  
+  std::vector<unsigned char> out;
+
+  while(stream.peek() != EOF) {
+
+    unsigned char count = stream.get();
+    unsigned char value = stream.get();
     
-  std::stack<bool> *s = new std::stack<bool>();
-  for (int i = 0; i < width * height; i++) {
-    auto value = getValue(i);
-    auto vec = toBitSet(value);
+    // std::cout << "count = " << (int)count << std::endl;
+    // std::cout << "value = " << (int)value << std::endl;
 
-    assert(vec.size() == dicoValueSize);
-
-    for(auto v : vec) {
-      s->push(v);
-    }
-    if(s->size() > 8) {
-      file << toChar(s);
+    for (int i = 0; i < count; i++) {
+      out.push_back(dico[0][value]);
+      out.push_back(dico[1][value]);
+      out.push_back(dico[2][value]);
     }
   }
-  file.close();
+
+  // int width = sqrt(out.size() / 3) + 1;
+  // int width = sqrt(((i * 8) / 5)) + 1;
+  std::cout << width << std::endl;
+  
+  char name[] = "decoded.ppm";
+  ecrire_image_ppm(name, &out[0], width, height);
+  return out;
 }
