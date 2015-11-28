@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
   ecrire_image_ppm(outString, out, width, height);
   std::cout << psnr(in, out, width, height) << std::endl;
   std::ofstream file("out.dat");
-  writeDicoToStream(dico, ycrcb, width, height, file, dicoSize);
+  writeDicoToStream(dico, in, width, height, file, dicoSize);
   file.close();
 
   std::ifstream stream("out.dat", std::ifstream::binary);
