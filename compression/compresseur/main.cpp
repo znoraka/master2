@@ -32,11 +32,12 @@ int main(int argc, char *argv[])
 
   char cNomImgLue[250];
   char outString[250] = "out.ppm";
+
   sscanf (argv[1],"%s",cNomImgLue);
 
   int width, height;
 
-  int dicoSize = 5;
+  int dicoSize = 3;
 	
   OCTET *in;
   lire_nb_lignes_colonnes_image_ppm(cNomImgLue, &width, &height);
@@ -46,16 +47,22 @@ int main(int argc, char *argv[])
   OCTET *ycrcb = toYCbCr(in, width, height);
   // // auto dico = extractDico(ycrcb, width, height, 12);
 
-  auto dico = extractDicoKmeans(in, width, height, dicoSize);
-  auto out = encodeFromDico(dico, in, width, height);
-  ecrire_image_ppm(outString, out, width, height);
-  std::cout << psnr(in, out, width, height) << std::endl;
+  // auto out = encodeFromDico(dico, ycrcb, width, height);
+  auto out = resizeImageChannel(ycrcb, width, height, 64, 64, Cr);
+  out = resizeImageChannel(&out[0], width, height, 64, 64, Cb);
+  auto dico = extractDicoKmeans(&out[0], width, height, dicoSize);
+  auto encoded = encodeFromDico(dico, ycrcb, width, height);
+  // ecrire_image_ppm(outString, &out[0], width, height);
+  std::cout << psnr(ycrcb, encoded, width, height) << std::endl;
   std::ofstream file("out.dat");
-  writeDicoToStream(dico, in, width, height, file, dicoSize);
+  writeDicoToStream(dico, ycrcb, width, height, file, dicoSize);
   file.close();
 
   std::ifstream stream("out.dat", std::ifstream::binary);
-  decodeFromDico(stream);
+  auto outImg = decodeFromDico(stream);
+
+  char name[] = "decoded.ppm";
+  ecrire_image_ppm(name, toRGB(&outImg[0], width, height), width, height);
   
   // writeRLEToFile(out, width, height, "out.dat");
   return 0;

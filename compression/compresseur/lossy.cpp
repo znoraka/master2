@@ -212,7 +212,6 @@ void writeDicoToStream(std::vector<std::vector<OCTET> > dico, OCTET* in, int wid
   
   for(auto vec : dico) {
     for(auto i : vec) {
-      std::cout << (int) i << std::endl;
       stream << i;
     }
   }
@@ -262,14 +261,6 @@ std::vector<OCTET> decodeFromDico(std::ifstream& stream) {
     }    
     dico.push_back(vec);
   }
-
-  for(auto vec : dico) {
-    for(auto i : vec) {
-      std::cout << (int) i << std::endl;
-    }
-  }
-
-  std::cout << "**************************" << std::endl;
   
   std::vector<unsigned char> out;
 
@@ -277,9 +268,6 @@ std::vector<OCTET> decodeFromDico(std::ifstream& stream) {
 
     unsigned char count = stream.get();
     unsigned char value = stream.get();
-    
-    // std::cout << "count = " << (int)count << std::endl;
-    // std::cout << "value = " << (int)value << std::endl;
 
     for (int i = 0; i < count; i++) {
       out.push_back(dico[0][value]);
@@ -288,11 +276,52 @@ std::vector<OCTET> decodeFromDico(std::ifstream& stream) {
     }
   }
 
-  // int width = sqrt(out.size() / 3) + 1;
-  // int width = sqrt(((i * 8) / 5)) + 1;
-  std::cout << width << std::endl;
-  
-  char name[] = "decoded.ppm";
-  ecrire_image_ppm(name, &out[0], width, height);
+   return out;
+}
+
+
+std::vector<OCTET> resizeImageChannel(OCTET* in, int width, int height, int dW, int dH, int color) {
+  std::vector<OCTET> temp;
+  std::vector<OCTET> out;
+
+  for (int i = 0; i < width * height * 3; i++) {
+    out.push_back(in[i]);
+  }
+
+  auto setAreaToAvgOfArea = [=](std::vector<OCTET>in, int x, int y, int w, int h) {
+    long avg = 0;
+    for (int i = x; i < w + x; i++) {
+      for (int j = y; j < h + y; j++) {
+	avg += in[i * height + j];
+      }
+    }
+    avg /= w * h;
+    for (int i = x; i < w + x; i++) {
+      for (int j = y; j < h + y; j++) {
+	in[i * height + j] = avg;
+      }
+    }
+    return in;
+  };
+
+  for (int i = 0; i < width; i++) {
+    for (int j = 0; j < height; j++) {
+      temp.push_back(at(in, width, height, i, j, color));
+    }
+  }
+
+  for (int i = 0; i < width; i += dW) {
+    for (int j = 0; j < height; j += dH) {
+      temp = setAreaToAvgOfArea(temp, i, j, dW, dH);
+    }
+  }
+
+  for (int i = 0; i < width; i++) {
+    for (int j = 0; j < height; j++) {
+      // out[i * height * 3 + j * 3 + color - 1] = temp[i * height + j];
+      at(&out[0], width, height, i, j, color) = at(&temp[0], width, height, i, j, 0);
+    }
+  }
+
   return out;
 }
