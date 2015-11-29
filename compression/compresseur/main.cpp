@@ -35,14 +35,50 @@ int main(int argc, char *argv[])
 
   sscanf (argv[1],"%s",cNomImgLue);
 
-  int width, height;
+  std::string filename = cNomImgLue;
+  std::string ext = filename.substr(filename.length() - 4, 4);
 
   int dicoSize = 5;
+  int width, height;
 	
   OCTET *in;
-  lire_nb_lignes_colonnes_image_ppm(cNomImgLue, &width, &height);
-  allocation_tableau(in, OCTET, width * height * 3);
-  lire_image_ppm(cNomImgLue, in, width * height);
+
+
+  if(ext.compare(".ppm") == 0) {
+
+    std::cout << "this is a ppm file!" << std::endl;
+    dicoSize = 5;
+
+    lire_nb_lignes_colonnes_image_ppm(cNomImgLue, &width, &height);
+    allocation_tableau(in, OCTET, width * height * 3);
+    lire_image_ppm(cNomImgLue, in, width * height);
+
+
+  } else if(ext.compare(".pgm") == 0) {
+
+    std::cout << "this is a pgm file!" << std::endl;
+    dicoSize = 4;
+
+    lire_nb_lignes_colonnes_image_pgm(cNomImgLue, &width, &height);
+    allocation_tableau(in, OCTET, width * height * 3);
+    std::vector<OCTET> temp; temp.resize(width * height);
+    lire_image_pgm(cNomImgLue, &temp[0], width * height);
+    
+    for (int i = 0; i < width; i++) {
+      for (int j = 0; j < height; j++) {
+	at(in, width, height, i, j, RED) = at(&temp[0], width, height, i, j, 0);
+	at(in, width, height, i, j, GREEN) = at(&temp[0], width, height, i, j, 0);
+	at(in, width, height, i, j, BLUE) = at(&temp[0], width, height, i, j, 0);
+      }
+    }
+
+
+  } else {
+
+    std::cout << "I can't process this file" << std::endl;
+    return -1;
+
+  }
 
   OCTET *ycrcb = toYCbCr(in, width, height);
   // // auto dico = extractDico(ycrcb, width, height, 12);
