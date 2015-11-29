@@ -82,69 +82,44 @@ std::vector<std::vector<OCTET> > extractDicoKmeans(OCTET *in, int width, int hei
   
   return dico;
 }
-/*
-std::vector<std::vector<OCTET> > extractDicoKmeansMlpack(OCTET *in, int width, int height, int dicoSize) {
+
+std::vector<std::vector<OCTET> > extractDicoMediaCut(OCTET *in, int width, int height, int dicoSize) {
   int K = pow(2, dicoSize);
-  point v = colorToPoint(in, width, height);
-  point c = lloyd(v, width * height, K);
-  std::vector<std::vector<long> > sums;
-  std::vector<int> counts;
+
   std::vector<std::vector<OCTET> > dico;
 
   for (int i = 0; i < 3; i++) {
-    sums.push_back(std::vector<long>());
     dico.push_back(std::vector<OCTET>());
   }
 
   for (int i = 0; i < K; i++) {
-    counts.push_back(0);
     for (int j = 0; j < 3; j++) {
-      sums[j].push_back(0);
       dico[j].push_back(0);
     }
   }
 
-  arma::mat data(3, width * height);
-  int cpt = 0;
-  for (int i = 0; i < width; i++) {
-    for (int j = 0; j < height; j++) {
-      data.at(0, cpt) = at(in, width, height, i, j, RED);
-      data.at(1, cpt) = at(in, width, height, i, j, GREEN);
-      data.at(2, cpt) = at(in, width, height, i, j, BLUE);
-      cpt++;
-    }
+  int numPoints = width * height;
+  std::vector<Point> points;
+  
+  for(int i = 0; i < numPoints; i++) {
+    Point p;
+    p.x[0] = in[i * 3 + 0];
+    p.x[1] = in[i * 3 + 1];
+    p.x[2] = in[i * 3 + 2];
+    points.push_back(p);
   }
-
-  // The number of clusters we are getting.
-  size_t clusters = K;
-
-  // The assignments will be stored in this vector.
-  arma::Col<size_t> assignments;
-
-  // Initialize with the default arguments.
-  KMeans<> k;
-  k.Cluster(data, clusters, assignments);
-
-  for(auto i : assignments) {
-    std::cout << i << std::endl;
-  }
-
- for (int i = 0; i < width * height; i++) {
-    counts[assignments[i]]++;
-    sums[0][assignments[i]] += in[i * 3];
-    sums[1][assignments[i]] += in[i * 3 + 1];
-    sums[2][assignments[i]] += in[i * 3 + 2];
-  }
-
-  for (int i = 0; i < K; i++) {
-    dico[0][i] = sums[0][i] / counts[i];
-    dico[1][i] = sums[1][i] / counts[i];
-    dico[2][i] = sums[2][i] / counts[i];
-  }
- 
+  
+  std::list<Point> palette = medianCut(&points[0], numPoints, K);
+  std::list<Point>::iterator iter;
+  int i = 0;
+  for (iter = palette.begin() ; iter != palette.end(); iter++) {
+    dico[0][i] = (int)iter->x[0];
+    dico[1][i] = (int)iter->x[1];
+    dico[2][i] = (int)iter->x[2];
+    i++;
+  }  
   return dico;
-}*/
-
+}
 
 OCTET* toYCbCr(OCTET* in, int width, int height) {
   OCTET *out;

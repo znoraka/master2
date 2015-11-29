@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
   sscanf (argv[1],"%s",cNomImgLue);
 
-  std::string filename = cNomImgLue;1
+  std::string filename = cNomImgLue;
   std::string ext = filename.substr(filename.length() - 4, 4);
 
   int dicoSize = 5;
@@ -100,10 +100,15 @@ int main(int argc, char *argv[])
   // auto out = encodeFromDico(dico, ycrcb, width, height);
   auto out = resizeImageChannel(ycrcb, width, height, 64, 64, Cr);
   out = resizeImageChannel(&out[0], width, height, 64, 64, Cb);
-  auto dico = extractDicoKmeans(&out[0], width, height, dicoSize);
+  std::vector<std::vector<OCTET> > dico;
+  if(dicoSize > 5) {
+    dico = extractDicoMediaCut(&out[0], width, height, dicoSize);
+  } else {
+    dico = extractDicoKmeans(&out[0], width, height, dicoSize);
+  }
   auto encoded = encodeFromDico(dico, ycrcb, width, height);
   // ecrire_image_ppm(outString, &out[0], width, height);
-  std::cout << "psnr = " <<  psnr(ycrcb, encoded, width, height) << std::endl;
+  std::cout << "psnr = " << psnr(ycrcb, encoded, width, height) << std::endl;
   std::ofstream file("out.tmp");
   writeDicoToStream(dico, ycrcb, width, height, file, dicoSize);
   file.close();
