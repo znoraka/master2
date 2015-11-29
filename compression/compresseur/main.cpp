@@ -30,15 +30,15 @@ float psnr(OCTET* in, OCTET* compressed, int width, int height) {
 int main(int argc, char *argv[])
 {
 
-  // ./main arnold.ppm && ../compresseur/scheme-compressor/rouleau -b out.tmp out.noe && ls -sh out.tmp && ls -sh out.noe
-  // ../compresseur/scheme-compressor/rouleau -d out.noe out.temp && ./main out.tmp && eog decoded.ppm
+  // ./main arnold.ppm && ./rouleau -b out.tmp out.noe && ls -sh out.tmp && ls -sh out.noe
+  // ./rouleau -d out.noe out.temp && ./main out.tmp && eog decoded.ppm
 
   char cNomImgLue[250];
 
 
   sscanf (argv[1],"%s",cNomImgLue);
 
-  std::string filename = cNomImgLue;
+  std::string filename = cNomImgLue;1
   std::string ext = filename.substr(filename.length() - 4, 4);
 
   int dicoSize = 5;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
   auto dico = extractDicoKmeans(&out[0], width, height, dicoSize);
   auto encoded = encodeFromDico(dico, ycrcb, width, height);
   // ecrire_image_ppm(outString, &out[0], width, height);
-  std::cout << psnr(ycrcb, encoded, width, height) << std::endl;
+  std::cout << "psnr = " <<  psnr(ycrcb, encoded, width, height) << std::endl;
   std::ofstream file("out.tmp");
   writeDicoToStream(dico, ycrcb, width, height, file, dicoSize);
   file.close();
