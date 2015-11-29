@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
   // ../compresseur/scheme-compressor/rouleau -d out.noe out.temp && ./main out.tmp && eog decoded.ppm
 
   char cNomImgLue[250];
-  char outString[250] = "out.ppm";
+
 
   sscanf (argv[1],"%s",cNomImgLue);
 
@@ -42,15 +42,20 @@ int main(int argc, char *argv[])
   std::string ext = filename.substr(filename.length() - 4, 4);
 
   int dicoSize = 5;
+
+    
+  if(argc > 2) {
+    sscanf (argv[2], "%d", &dicoSize);
+  }
+
+
   int width, height;
 	
   OCTET *in;
-
-
+  
   if(ext.compare(".ppm") == 0) {
 
     std::cout << "this is a ppm file!" << std::endl;
-    dicoSize = 5;
 
     lire_nb_lignes_colonnes_image_ppm(cNomImgLue, &width, &height);
     allocation_tableau(in, OCTET, width * height * 3);
@@ -60,7 +65,6 @@ int main(int argc, char *argv[])
   } else if(ext.compare(".pgm") == 0) {
 
     std::cout << "this is a pgm file!" << std::endl;
-    dicoSize = 4;
 
     lire_nb_lignes_colonnes_image_pgm(cNomImgLue, &width, &height);
     allocation_tableau(in, OCTET, width * height * 3);
@@ -75,7 +79,7 @@ int main(int argc, char *argv[])
       }
     }
   } else if(ext.compare(".tmp") == 0) {
-      
+
     std::ifstream stream("out.tmp", std::ifstream::binary);
     auto outImg = decodeFromDico(stream, width, height);
 
