@@ -30,6 +30,9 @@ float psnr(OCTET* in, OCTET* compressed, int width, int height) {
 int main(int argc, char *argv[])
 {
 
+  // ./main arnold.ppm && ../compresseur/scheme-compressor/rouleau -b out.tmp out.noe && ls -sh out.tmp && ls -sh out.noe
+  // ../compresseur/scheme-compressor/rouleau -d out.noe out.temp && ./main out.tmp && eog decoded.ppm
+
   char cNomImgLue[250];
   char outString[250] = "out.ppm";
 
@@ -71,7 +74,14 @@ int main(int argc, char *argv[])
 	at(in, width, height, i, j, BLUE) = at(&temp[0], width, height, i, j, 0);
       }
     }
+  } else if(ext.compare(".tmp") == 0) {
+      
+    std::ifstream stream("out.tmp", std::ifstream::binary);
+    auto outImg = decodeFromDico(stream, width, height);
 
+    char name[] = "decoded.ppm";
+    ecrire_image_ppm(name, toRGB(&outImg[0], width, height), width, height);
+    return 0;
 
   } else {
 
@@ -90,15 +100,9 @@ int main(int argc, char *argv[])
   auto encoded = encodeFromDico(dico, ycrcb, width, height);
   // ecrire_image_ppm(outString, &out[0], width, height);
   std::cout << psnr(ycrcb, encoded, width, height) << std::endl;
-  std::ofstream file("out.dat");
+  std::ofstream file("out.tmp");
   writeDicoToStream(dico, ycrcb, width, height, file, dicoSize);
   file.close();
-
-  std::ifstream stream("out.dat", std::ifstream::binary);
-  auto outImg = decodeFromDico(stream);
-
-  char name[] = "decoded.ppm";
-  ecrire_image_ppm(name, toRGB(&outImg[0], width, height), width, height);
   
   // writeRLEToFile(out, width, height, "out.dat");
   return 0;

@@ -295,10 +295,10 @@ void writeDicoToStream(std::vector<std::vector<OCTET> > dico, OCTET* in, int wid
   stream.flush();
 }
 
-std::vector<OCTET> decodeFromDico(std::ifstream& stream) {
+std::vector<OCTET> decodeFromDico(std::ifstream& stream, int& width, int& height) {
   int size = stream.get();
-  int width = stream.get() * 256 + stream.get();
-  int height = stream.get() * 256 + stream.get();
+  width = stream.get() * 256 + stream.get();
+  height = stream.get() * 256 + stream.get();
 
   std::cout << "width = " << width << std::endl;
   std::cout << "height = " << height << std::endl;
