@@ -8,7 +8,7 @@ else
     ../compiled/rouleau -b out.tmp out.noe
     ls -sh out.tmp
     ls -sh out.noe
-    taux=$(echo $(du -b $1) / $(du -b out.noe) | tr -dc '0-9/ ')
+    taux=$(echo $(du -b $1 | awk '{print $1}') / $(du -b out.noe | awk '{print $1}') | tr -dc '0-9/ ')
     echo "taux de compression =" $(echo "scale=2;" $taux | bc -l)
     rm out.tmp
 fi

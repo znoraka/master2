@@ -94,12 +94,15 @@ int main(int argc, char *argv[])
 
   }
 
+  if(dicoSize > 8) dicoSize = 8;
+
   OCTET *ycrcb = toYCbCr(in, width, height);
   // // auto dico = extractDico(ycrcb, width, height, 12);
 
   // auto out = encodeFromDico(dico, ycrcb, width, height);
-  auto out = resizeImageChannel(ycrcb, width, height, 64, 64, Cr);
-  out = resizeImageChannel(&out[0], width, height, 64, 64, Cb);
+  auto out = resizeImageChannel(ycrcb, width, height, 16, 16, Cr);
+  out = resizeImageChannel(&out[0], width, height, 16, 16, Cb);
+  // out = resizeImageChannel(&out[0], width, height, 32, 32, Yc);
   std::vector<std::vector<OCTET> > dico;
   if(dicoSize > 5) {
     dico = extractDicoMediaCut(&out[0], width, height, dicoSize);
