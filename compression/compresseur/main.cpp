@@ -43,17 +43,14 @@ int main(int argc, char *argv[])
 
   int dicoSize = 5;
 
-    
-  if(argc > 2) {
-    sscanf (argv[2], "%d", &dicoSize);
-  }
-
-
   int width, height;
 	
   OCTET *in;
   
   if(ext.compare(".ppm") == 0) {
+    if(argc > 2) {
+      sscanf (argv[2], "%d", &dicoSize);
+    }
 
     std::cout << "this is a ppm file!" << std::endl;
 
@@ -63,7 +60,10 @@ int main(int argc, char *argv[])
 
 
   } else if(ext.compare(".pgm") == 0) {
-
+    if(argc > 2) {
+      sscanf (argv[2], "%d", &dicoSize);
+    }
+ 
     std::cout << "this is a pgm file!" << std::endl;
 
     lire_nb_lignes_colonnes_image_pgm(cNomImgLue, &width, &height);
@@ -83,7 +83,12 @@ int main(int argc, char *argv[])
     std::ifstream stream("out.tmp", std::ifstream::binary);
     auto outImg = decodeFromDico(stream, width, height);
 
-    char name[] = "decoded.ppm";
+    char name[250];
+
+    if(argc > 2) {
+      sscanf (argv[2], "%s", name);
+    }
+ 
     ecrire_image_ppm(name, toRGB(&outImg[0], width, height), width, height);
     return 0;
 
