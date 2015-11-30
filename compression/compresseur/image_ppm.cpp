@@ -12,7 +12,7 @@ void ignorer_commentaires(FILE * f)
 
 
 /*===========================================================================*/
-void ecrire_image_ppm(char  nom_image[], OCTET *pt_image, int nb_lignes, int nb_colonnes)
+void ecrire_image_ppm(char  nom_image[], OCTET *pt_image, int nb_colonnes, int nb_lignes)
 {
    FILE *f_image;
    int taille_image = 3*nb_colonnes * nb_lignes;
@@ -39,7 +39,7 @@ void ecrire_image_ppm(char  nom_image[], OCTET *pt_image, int nb_lignes, int nb_
 /*===========================================================================*/
 
 /*===========================================================================*/		
-void lire_nb_lignes_colonnes_image_ppm(char nom_image[], int *nb_lignes, int *nb_colonnes)
+void lire_nb_lignes_colonnes_image_ppm(char nom_image[], int *nb_colonnes, int *nb_lignes)
 {
    FILE *f_image;
    int max_grey_val;
@@ -125,7 +125,7 @@ void planB(OCTET *pt_image, OCTET *src, int taille_image){
 /*===========================================================================*/   
 /*===========================================================================*/
 
-void ecrire_image_pgm(char  nom_image[], OCTET *pt_image, int nb_lignes, int nb_colonnes)
+void ecrire_image_pgm(char  nom_image[], OCTET *pt_image, int nb_colonnes, int nb_lignes)
 {
    FILE *f_image;
    int taille_image = nb_colonnes * nb_lignes;
@@ -151,7 +151,7 @@ void ecrire_image_pgm(char  nom_image[], OCTET *pt_image, int nb_lignes, int nb_
 }
 /*===========================================================================*/
 
-void lire_nb_lignes_colonnes_image_pgm(char nom_image[], int *nb_lignes, int *nb_colonnes)
+void lire_nb_lignes_colonnes_image_pgm(char nom_image[], int *nb_colonnes, int *nb_lignes)
 {
    FILE *f_image;
    int max_grey_val;
@@ -204,9 +204,9 @@ void lire_image_pgm(char  nom_image[], OCTET *pt_image, int taille_image)
 }
 OCTET& at(OCTET* array, int width, int height, int x, int y, int color) {
   if(color == 0) {
-    return array[height * x + y];
+    return array[width * y + x];
   } else {
-    return array[height * x * 3 + y * 3 + color - 1];
+    return array[width * y * 3 + x * 3 + color - 1];
   }
 
 }

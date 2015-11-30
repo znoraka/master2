@@ -317,34 +317,35 @@ std::vector<OCTET> resizeImageChannel(OCTET* in, int width, int height, int dW, 
 
   auto setAreaToAvgOfArea = [=](std::vector<OCTET>in, int x, int y, int w, int h) {
     long avg = 0;
-    for (int i = x; i < w + x; i++) {
-      for (int j = y; j < h + y; j++) {
-	avg += in[i * width + j];
+    for (int j = y; j < h + y && j < height; j++) {
+      for (int i = x; i < w + x && i < width; i++) {
+	avg += at(&in[0], width, height, i, j, 0);
+	// avg += in[i * height + j];
       }
     }
     avg /= w * h;
-    for (int i = x; i < w + x; i++) {
-      for (int j = y; j < h + y; j++) {
-	in[i * width + j] = avg;
+    for (int j = y; j < h + y && j < height; j++) {
+      for (int i = x; i < w + x && i < width; i++) {
+	at(&in[0], width, height, i, j, 0) = avg;
       }
     }
     return in;
   };
 
-  for (int i = 0; i < width; i++) {
-    for (int j = 0; j < height; j++) {
+  for (int j = 0; j < height; j++) {
+    for (int i = 0; i < width; i++) {
       temp.push_back(at(in, width, height, i, j, color));
     }
   }
 
-  for (int i = 0; i < width; i += dW) {
-    for (int j = 0; j < height; j += dH) {
+  for (int j = 0; j < height; j += dH) {
+    for (int i = 0; i < width; i += dW) {
       temp = setAreaToAvgOfArea(temp, i, j, dW, dH);
     }
   }
 
-  for (int i = 0; i < width; i++) {
-    for (int j = 0; j < height; j++) {
+  for (int j = 0; j < height; j++) {
+    for (int i = 0; i < width; i++) {
       at(&out[0], width, height, i, j, color) = at(&temp[0], width, height, i, j, 0);
     }
   }

@@ -99,14 +99,12 @@ int main(int argc, char *argv[])
 
   }
 
-  if(dicoSize > 8) dicoSize = 8;
+  if(dicoSize > 8) dicoSize = 8; if(dicoSize < 1) dicoSize = 1;
 
   OCTET *ycrcb = toYCbCr(in, width, height);
-  // // auto dico = extractDico(ycrcb, width, height, 12);
 
-  // auto out = encodeFromDico(dico, ycrcb, width, height);
-  auto out = resizeImageChannel(ycrcb, width, height, 16, 16, Cr);
-  out = resizeImageChannel(&out[0], width, height, 16, 16, Cb);
+  auto out = resizeImageChannel(ycrcb, width, height, 4, 4, Cr);
+  out = resizeImageChannel(&out[0], width, height, 4, 4, Cb);
   // out = resizeImageChannel(&out[0], width, height, 32, 32, Yc);
   std::vector<std::vector<OCTET> > dico;
   if(dicoSize > 5) {
@@ -115,12 +113,10 @@ int main(int argc, char *argv[])
     dico = extractDicoKmeans(&out[0], width, height, dicoSize);
   }
   auto encoded = encodeFromDico(dico, ycrcb, width, height);
-  // ecrire_image_ppm(outString, &out[0], width, height);
   std::cout << "psnr = " << psnr(ycrcb, encoded, width, height) << std::endl;
   std::ofstream file("out.tmp");
-  writeDicoToStream(dico, ycrcb, width, height, file, dicoSize);
+  writeDicoToStream(dico, &out[0], width, height, file, dicoSize);
   file.close();
-  
-  // writeRLEToFile(out, width, height, "out.dat");
+
   return 0;
 }
