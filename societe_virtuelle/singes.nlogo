@@ -1,10 +1,10 @@
 globals [
-  ticks-per-day
   tick-count
   days
   turtle-id
   total-tick-count
   saluts-count
+  leader
 ]
 
 turtles-own [
@@ -19,7 +19,10 @@ turtles-own [
   mates
   salut-count
   salut-count-list
+  strengths-list
+  last-strengths-mean
   last-saluts-mean
+  salut-receptiveness
 ]
 
 to setup
@@ -30,7 +33,6 @@ to setup
 end
 
 to setup-globals
-  set ticks-per-day 5
   set tick-count 0
   set days 0
   set turtle-id 0
@@ -52,6 +54,7 @@ to setup-monkeys
       set strength random 1000
       set combat-ability random 200
       set leader-strength strength
+      set salut-receptiveness random 100 - 50
       set min-strength 0
       set has-token? true
       set name word "turtle-" turtle-id
@@ -62,6 +65,7 @@ to setup-monkeys
       set salut-count 0
       set turtle-id turtle-id + 1
       set salut-count-list (list 0)
+      set strengths-list (list 0)
     ]
 end
 
@@ -72,13 +76,14 @@ end
 to go
   ask turtles [set-mates]
   ask turtles [move]
-  ask turtles [fight]
+  if combat-on? [ask turtles [fight]]
   ask turtles [check-salut]
   ask turtles [check-strength]
   ask turtles [decrease-leader-strength-memory]
   ask turtles [plot-strength]
   ask turtles [plot-saluts]
   time
+  set leader turtles with-max [strength]
   tick
 end
 
@@ -128,14 +133,14 @@ end
 to salut [monkey]
   set has-token? false
   set saluts-count (saluts-count + 1)
-  ask monkey [set strength strength + strength-per-salut / 20]
+  ask monkey [set strength strength + (strength-per-salut / 20)]
   ask monkey [set salut-count (salut-count + 1)]
   ask patch-here [set pcolor blue]
 end
 
 to decrease-leader-strength-memory
-  set leader-strength leader-strength - 5
-  set strength strength - 2
+  set leader-strength (leader-strength - memory-of-strength-decay)
+  set strength (strength - memory-of-strength-decay / 2)
 end
 
 to fight
@@ -150,10 +155,10 @@ to fight
           ask patch-here [set pcolor red]
           ifelse random combat-ability + strength > random [combat-ability] of monkey + [strength] of monkey
           [
-            set strength strength + strength-per-salut * 4 / 20
+            set strength strength + (strength-per-salut * 1.5 / 20)
           ]
           [
-            ask monkey [set strength strength - strength / 4]
+            ask monkey [set strength strength - (strength / 4) + salut-receptiveness]
           ]
         ]
     ]
@@ -179,23 +184,28 @@ to time
   [
     ask turtles [
       set last-saluts-mean ((mean salut-count-list) / saluts-count) * 100
+      set last-strengths-mean (mean strengths-list)
     ]
     set tick-count 0
     ask turtles [set has-token? true]
     ask turtles [set salut-count-list lput salut-count salut-count-list]
+    ask turtles [set strengths-list lput strength strengths-list]
     ask turtles [
       if length salut-count-list > 10
       [
         set salut-count-list butfirst salut-count-list
       ]
+      if length strengths-list > 10
+      [
+        set strengths-list butfirst strengths-list
+      ]
     ]
     ask turtles [set salut-count 0]
     set saluts-count 0
-    ask turtles [
-      set strength strength - 1
-      set leader-strength leader-strength - 1
-
-    ]
+   ; ask turtles [
+   ;   set strength strength - 1
+   ;   set leader-strength leader-strength - 1
+   ; ]
   ]
 end
 
@@ -204,7 +214,7 @@ to plot-strength
   set-current-plot-pen name
   set-plot-pen-color color
   set-plot-x-range (total-tick-count - 1000) total-tick-count
-  plotxy total-tick-count strength
+  plotxy total-tick-count last-strengths-mean
 end
 
 to plot-saluts
@@ -214,7 +224,6 @@ to plot-saluts
   set-plot-x-range (total-tick-count - 1000) total-tick-count
   plot last-saluts-mean
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 288
@@ -286,7 +295,7 @@ initial-monkeys
 initial-monkeys
 2
 100
-32
+7
 1
 1
 NIL
@@ -299,14 +308,14 @@ PLOT
 210
 Strength
 weeks
-Saluts
+Strength
 0.0
 52.0
 0.0
 350.0
 false
 true
-"set-plot-y-range 0 1000" ""
+"" "set-plot-y-range 0 500"
 PENS
 
 SLIDER
@@ -318,7 +327,7 @@ strength-per-salut
 strength-per-salut
 0
 1000
-92
+477
 1
 1
 NIL
@@ -340,6 +349,80 @@ false
 true
 "" ""
 PENS
+
+SLIDER
+14
+170
+203
+203
+ticks-per-day
+ticks-per-day
+1
+100
+12
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+13
+211
+202
+244
+memory-of-strength-decay
+memory-of-strength-decay
+0
+100
+17
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+288
+475
+402
+520
+leader strength
+[strength] of leader
+17
+1
+11
+
+MONITOR
+411
+475
+541
+520
+leader combat-ability
+[combat-ability] of leader
+17
+1
+11
+
+MONITOR
+549
+474
+715
+519
+leader salut-receptiveness
+[salut-receptiveness] of leader
+17
+1
+11
+
+SWITCH
+13
+253
+154
+286
+combat-on?
+combat-on?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
