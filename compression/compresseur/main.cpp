@@ -29,12 +29,7 @@ float psnr(OCTET* in, OCTET* compressed, int width, int height) {
 
 int main(int argc, char *argv[])
 {
-
-  // ./main arnold.ppm && ./rouleau -b out.tmp out.noe && ls -sh out.tmp && ls -sh out.noe
-  // ./rouleau -d out.noe out.temp && ./main out.tmp && eog decoded.ppm
-
   char cNomImgLue[250];
-
 
   sscanf (argv[1],"%s",cNomImgLue);
 

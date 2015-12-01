@@ -46,14 +46,6 @@ std::vector<std::vector<OCTET> > extractDico(OCTET *in, int width, int height, i
   dico.push_back(clamp(Cb, pow(2, dicoSize * 0.25), histos[2]));
 
   return dico;
-
-  // for (int i = 0; i < 256; i++) {
-  //     std::cout << i << " ";
-  //     std::cout << histos[0][i] << " ";
-  //     std::cout << dico[1][i] << " ";
-  //     std::cout << dico[2][i] << " ";
-  //     std::cout << std::endl;
-  // }
 }
 
 std::vector<std::vector<OCTET> > extractDicoKmeans(OCTET *in, int width, int height, int dicoSize) {
@@ -140,9 +132,9 @@ OCTET* toYCbCr(OCTET* in, int width, int height) {
       // if(u > 255 || u < 0) std::cout << "u = " << u << std::endl;
       // if(v > 255 || v < 0) std::cout << "v = " << v << std::endl;
 
-      at(out, width, height, i, j, Yc) = y;
-      at(out, width, height, i, j, Cr) = u;
-      at(out, width, height, i, j, Cb) = v;
+      at(out, width, height, i, j, Yc) = fmax(0, fmin(255, y));;
+      at(out, width, height, i, j, Cr) = fmax(0, fmin(255, u));;
+      at(out, width, height, i, j, Cb) = fmax(0, fmin(255, v));;
     }
   }
   return out;
@@ -160,13 +152,15 @@ OCTET* toRGB(OCTET* in, int width, int height) {
       double u = at(in, width, height, i, j, Cr) - 128;
       double v = at(in, width, height, i, j, Cb) - 128;
 
-      double red = y + 1.140 * v;
-      double green = y - 0.395 * u - 0.581 * v;
-      double blue = y + 2.032 * u;
+      double red = y + 1.13983 * v;
+      double green = y - 0.39465 * u - 0.58060 * v;
+      double blue = y + 2.03211 * u;
 
       // if(red > 255 || red < 0) std::cout << "red = " << red << std::endl;
       // if(green > 255 || green < 0) std::cout << "green = " << green << std::endl;
       // if(blue > 255 || blue < 0) std::cout << "blue = " << blue << std::endl;
+
+      // if(red < -10) red = 255 - red;
 
       at(out, width, height, i, j, RED) = fmax(0, fmin(255, red));
       at(out, width, height, i, j, GREEN) = fmax(0, fmin(255, green));
