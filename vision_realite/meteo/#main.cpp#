@@ -125,9 +125,6 @@ int main(int argc, char** argv)
 
 	  Mat computedVariations(frame.rows, frame.cols, CV_8UC1);
 
-	
-
-	  
 	  if(variations.rows == 0) {
 	    // base = frame.clone();
 	    cvtColor(frame, base, CV_RGB2GRAY);
