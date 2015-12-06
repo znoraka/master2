@@ -344,3 +344,24 @@ std::vector<OCTET> resizeImageChannel(OCTET* in, int width, int height, int dW, 
 
   return out;
 }
+
+void exportPaletteToPpm(std::vector<std::vector<OCTET> > dico, std::string filePath) {
+  int height = 32;
+  int bandWidth = 4;
+  int width = dico[0].size();
+
+  std::vector<OCTET> img;
+  img.resize(width * height * 3 * bandWidth);
+  for (int i = 0; i < width; i++) {
+    for (int j = 0; j < height; j++) {
+      for (int k = 0; k < bandWidth; k++) {
+	at(&img[0], width, height * bandWidth, i, j + k, RED) = dico[0][i];
+	at(&img[0], width, height * bandWidth, i, j + k, GREEN) = dico[1][i];
+	at(&img[0], width, height * bandWidth, i, j + k, BLUE) = dico[2][i];
+      }
+    }
+  }
+
+  ecrire_image_ppm(const_cast<char*>(filePath.c_str()), toRGB(&img[0], width, height), width, height);
+
+}

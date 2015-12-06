@@ -111,6 +111,8 @@ int main(int argc, char *argv[])
   // char name[] = "../compiled/temp.ppm";
   // ecrire_image_ppm(name, toRGB(encoded, width, height), width, height);
 
+  exportPaletteToPpm(dico, "../compiled/palette.ppm");
+
   std::cout << "psnr = " << psnr(ycrcb, encoded, width, height) << std::endl;
   std::ofstream file("out.tmp");
   // writeDicoToStream(dico, &out[0], width, height, file, dicoSize);

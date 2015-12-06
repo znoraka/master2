@@ -20,3 +20,4 @@ OCTET *toRGB(OCTET* in, int width, int height);
 void writeDicoToStream(std::vector<std::vector<OCTET> > dico, OCTET* encodedImage, int width, int height, std::ostream& stream, int dicoValueSize);
 std::vector<OCTET> decodeFromDico(std::ifstream& stream, int& width, int& height);
 std::vector<OCTET> resizeImageChannel(OCTET* in, int width, int height, int dW, int outHeight, int color);
+void exportPaletteToPpm(std::vector<std::vector<OCTET> > dico, std::string filePath);
