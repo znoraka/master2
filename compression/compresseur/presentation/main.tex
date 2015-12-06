@@ -68,15 +68,28 @@
 \begin{frame}
   \frametitle{Algorithmes utilisés}
   \begin{block}{YUV}
-    Passage de U et V en carrés de 32 * 32
-  \end{block}
-  \begin{block}{Median-cut}
-
+    Passage de U et V en carrés de 32 * 32 pixels
   \end{block}
   \begin{block}{Kmeans}
-
+    Clustering jusqu'à 32 couleurs
+  \end{block}
+  \begin{block}{Median-cut}
+    Clustering à partir de 32 couleurs
   \end{block}
 \end{frame}
+\begin{frame}
+  \frametitle{Exemples}
+  \begin{center}
+    \includegraphics[scale=0.37]{her.png}
+  \end{center}
+\end{frame}
+\begin{frame}
+  \frametitle{Exemples}
+  \begin{center}
+    \includegraphics[scale=0.37]{bnw.png}
+  \end{center}
+\end{frame}
+
 \subsection{Utilisation de la palette de couleur}
 \begin{frame}
   \frametitle{Utilisation de la palette de couleur}
@@ -98,5 +111,28 @@
     \end{block}
   \end{frame}
 \section{Codage sans perte}
-\subsection{}
+\subsection{Algorithmes utilisés}
+\begin{frame}
+  \frametitle{Algorithmes utilisés}
+  \begin{block}{Burrows-Wheeler}
+    Regroupement en suites de caractères identiques
+  \end{block}
+  \begin{block}{LZW - Huffman}
+    Meilleure représentation des données
+  \end{block}
+\end{frame}
+
+\section{Résultats}
+\begin{frame}
+  \frametitle{Résultat sur une image couleur}
+  \begin{center}
+    \includegraphics[scale=0.4]{her_graph.png}
+  \end{center}
+\end{frame}
+\begin{frame}
+  \frametitle{Résultat sur une image noir et blanc}
+  \begin{center}
+    \includegraphics[scale=0.4]{bnw_graph.png}
+  \end{center}
+\end{frame}
 \end{document}

@@ -1,2 +1,9 @@
-\BOOKMARK [2][]{Outline0.1}{Section 1}{}% 1
-\BOOKMARK [3][]{Outline0.1.1.3}{Subsection 1}{Outline0.1}% 2
+\BOOKMARK [2][]{Outline0.1}{Structure du compresseur}{}% 1
+\BOOKMARK [3][]{Outline0.1.1.3}{Compression en deux temps}{Outline0.1}% 2
+\BOOKMARK [2][]{Outline0.2}{D\351tail des m\351thodes}{}% 3
+\BOOKMARK [3][]{Outline0.2.1.6}{Extraction de la palette de couleur}{Outline0.2}% 4
+\BOOKMARK [3][]{Outline0.2.2.11}{Utilisation de la palette de couleur}{Outline0.2}% 5
+\BOOKMARK [3][]{Outline0.2.3.12}{RLE}{Outline0.2}% 6
+\BOOKMARK [2][]{Outline0.3}{Codage sans perte}{}% 7
+\BOOKMARK [3][]{Outline0.3.1.14}{Algorithmes utilis\351s}{Outline0.3}% 8
+\BOOKMARK [2][]{Outline0.4}{R\351sultats}{}% 9

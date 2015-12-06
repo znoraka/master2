@@ -347,7 +347,7 @@ std::vector<OCTET> resizeImageChannel(OCTET* in, int width, int height, int dW, 
 
 void exportPaletteToPpm(std::vector<std::vector<OCTET> > dico, std::string filePath) {
   int height = 32;
-  int bandWidth = 4;
+  int bandWidth = 8;
   int width = dico[0].size();
 
   std::vector<OCTET> img;
