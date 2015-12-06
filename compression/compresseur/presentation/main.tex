@@ -1,0 +1,46 @@
+\documentclass{beamer}
+ 
+\usepackage[frenchb]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+ 
+\usetheme{Frankfurt}
+  
+\title{Compresseur universel}
+\author{Noé LE PHILIPPE}
+\institute{}
+\date{\today}
+% \logo{\includegraphics[height=10mm]{images/logo.png}}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+
+\AtBeginSection[]
+{
+  \begin{frame}
+  \frametitle{Sommaire}
+  \tableofcontents[currentsection, hideothersubsections]
+  \end{frame} 
+}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Section 1}
+\subsection{Subsection 1}
+\begin{frame}
+  \frametitle{Frame 1}
+
+  \begin{block}{Block 1}
+  \end{block}
+  \pause
+\end{frame}
+\end{document}

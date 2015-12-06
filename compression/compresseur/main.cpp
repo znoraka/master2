@@ -23,7 +23,7 @@ float psnr(OCTET* in, OCTET* compressed, int width, int height) {
       mse += pow(at(in, width, height, i, j, BLUE) - at(compressed, width, height, i, j, BLUE), 2);
     }
   }
-  mse /= (width * height * 3);
+  mse /= (width * height * 3.0);
   return 10 * log10(pow(255, 2) /  mse);
 }
 
@@ -98,9 +98,9 @@ int main(int argc, char *argv[])
 
   OCTET *ycrcb = toYCbCr(in, width, height);
 
-  auto out = resizeImageChannel(ycrcb, width, height, 4, 4, Cr);
-  out = resizeImageChannel(&out[0], width, height, 4, 4, Cb);
-  // out = resizeImageChannel(&out[0], width, height, 32, 32, Yc);
+  auto out = resizeImageChannel(ycrcb, width, height, 32, 32, Cr);
+  out = resizeImageChannel(&out[0], width, height, 32, 32, Cb);
+  // out = resizeImageChannel(&out[0], width, height, 8, 8, Yc);
   std::vector<std::vector<OCTET> > dico;
   if(dicoSize > 5) {
     dico = extractDicoMediaCut(&out[0], width, height, dicoSize);
@@ -108,9 +108,13 @@ int main(int argc, char *argv[])
     dico = extractDicoKmeans(&out[0], width, height, dicoSize);
   }
   auto encoded = encodeFromDico(dico, ycrcb, width, height);
+  // char name[] = "../compiled/temp.ppm";
+  // ecrire_image_ppm(name, toRGB(encoded, width, height), width, height);
+
   std::cout << "psnr = " << psnr(ycrcb, encoded, width, height) << std::endl;
   std::ofstream file("out.tmp");
-  writeDicoToStream(dico, &out[0], width, height, file, dicoSize);
+  // writeDicoToStream(dico, &out[0], width, height, file, dicoSize);
+  writeDicoToStream(dico, ycrcb, width, height, file, dicoSize);
   file.close();
 
   return 0;

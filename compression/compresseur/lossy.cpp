@@ -160,8 +160,6 @@ OCTET* toRGB(OCTET* in, int width, int height) {
       // if(green > 255 || green < 0) std::cout << "green = " << green << std::endl;
       // if(blue > 255 || blue < 0) std::cout << "blue = " << blue << std::endl;
 
-      // if(red < -10) red = 255 - red;
-
       at(out, width, height, i, j, RED) = fmax(0, fmin(255, red));
       at(out, width, height, i, j, GREEN) = fmax(0, fmin(255, green));
       at(out, width, height, i, j, BLUE) = fmax(0, fmin(255, blue));
