@@ -23,6 +23,7 @@ turtles-own [
   last-strengths-mean
   last-saluts-mean
   salut-receptiveness
+  number-of-ticks-as-leader
 ]
 
 to setup
@@ -58,9 +59,12 @@ to setup-monkeys
       set min-strength 0
       set has-token? true
       set name word "turtle-" turtle-id
+      set number-of-ticks-as-leader 0
       set-current-plot "Strength"
       create-temporary-plot-pen name
       set-current-plot "Saluts"
+      create-temporary-plot-pen name
+      set-current-plot "Time-as-leader"
       create-temporary-plot-pen name
       set salut-count 0
       set turtle-id turtle-id + 1
@@ -82,9 +86,25 @@ to go
   ask turtles [decrease-leader-strength-memory]
   ask turtles [plot-strength]
   ask turtles [plot-saluts]
+  ask turtles [plot-time-as-leader]
   time
   set leader turtles with-max [strength]
+  ask leader [
+    set number-of-ticks-as-leader number-of-ticks-as-leader + 1
+  ]
   tick
+  if total-tick-count >= ticks-per-simulation
+  [
+    set simulations-count (simulations-count - 1)
+    export-results
+    ifelse simulations-count > 0
+    [
+      setup
+    ]
+    [
+      stop
+    ]
+  ]
 end
 
 to set-mates
@@ -224,6 +244,36 @@ to plot-saluts
   set-plot-x-range (total-tick-count - 1000) total-tick-count
   plot last-saluts-mean
 end
+
+
+to plot-time-as-leader
+  if total-tick-count > 0
+  [
+    set-current-plot "Time-as-leader"
+    set-current-plot-pen name
+    set-plot-pen-color color
+    set-plot-x-range (total-tick-count - 1000) total-tick-count
+   ; print number-of-ticks-as-leader
+    plot (number-of-ticks-as-leader / total-tick-count) * 100
+  ]
+end
+
+to export-results
+  file-open (word "out.txt")
+ ; file-print strength-per-salut
+ ; file-print ticks-per-day
+ ; file-print memory-of-strength-decay
+  ask turtles [export-monkey]
+  file-close
+end
+
+to export-monkey
+;  file-print "**************"
+;  file-print name
+;  file-print combat-ability
+;  file-print salut-receptiveness
+  file-print (word combat-ability " " salut-receptiveness " " ((number-of-ticks-as-leader / total-tick-count) * 100))
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 288
@@ -295,7 +345,7 @@ initial-monkeys
 initial-monkeys
 2
 100
-7
+9
 1
 1
 NIL
@@ -327,7 +377,7 @@ strength-per-salut
 strength-per-salut
 0
 1000
-477
+514
 1
 1
 NIL
@@ -359,7 +409,7 @@ ticks-per-day
 ticks-per-day
 1
 100
-12
+16
 1
 1
 NIL
@@ -374,7 +424,7 @@ memory-of-strength-decay
 memory-of-strength-decay
 0
 100
-17
+18
 1
 1
 NIL
@@ -423,6 +473,64 @@ combat-on?
 0
 1
 -1000
+
+MONITOR
+725
+474
+848
+519
+NIL
+[name] of leader
+17
+1
+11
+
+PLOT
+12
+300
+277
+499
+Time-as-leader
+NIL
+NIL
+0.0
+10.0
+0.0
+100.0
+false
+true
+"" ""
+PENS
+
+SLIDER
+1026
+10
+1211
+43
+simulations-count
+simulations-count
+1
+100
+0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1026
+52
+1211
+85
+ticks-per-simulation
+ticks-per-simulation
+1
+50000
+30000
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
