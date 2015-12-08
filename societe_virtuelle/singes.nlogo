@@ -8,8 +8,6 @@ globals [
 ]
 
 turtles-own [
-  male?
-  status
   strength
   min-strength
   leader-strength
@@ -17,12 +15,13 @@ turtles-own [
   combat-ability
   name
   mates
+  mates-with-count
   salut-count
   salut-count-list
   strengths-list
   last-strengths-mean
   last-saluts-mean
-  salut-receptiveness
+  charisma
   number-of-ticks-as-leader
 ]
 
@@ -31,6 +30,7 @@ to setup
   setup-monkeys
   setup-globals
   reset-ticks
+  ask turtles [set-mates]
 end
 
 to setup-globals
@@ -48,14 +48,10 @@ to setup-monkeys
       setxy random-xcor random-ycor
       set color one-of base-colors
       set shape "ghost"
-      ifelse random 2 = 0
-      [ set male? true]
-      [ set male? false]
-      set status 0
       set strength random 1000
       set combat-ability random 200
       set leader-strength strength
-      set salut-receptiveness random 100 - 50
+      set charisma random 100 - 50
       set min-strength 0
       set has-token? true
       set name word "turtle-" turtle-id
@@ -78,7 +74,7 @@ end
 ;;;
 
 to go
-  ask turtles [set-mates]
+  ask turtles [erase-relations]
   ask turtles [move]
   if combat-on? [ask turtles [fight]]
   ask turtles [check-salut]
@@ -87,6 +83,7 @@ to go
   ask turtles [plot-strength]
   ask turtles [plot-saluts]
   ask turtles [plot-time-as-leader]
+  ask turtles [draw-relations]
   time
   set leader turtles with-max [strength]
   ask leader [
@@ -108,15 +105,16 @@ to go
 end
 
 to set-mates
+  set mates-with-count (list)
   set mates turtles with [name != [name] of myself]
+  foreach [self] of (turtles with [name != [name] of myself])
+  [
+    set mates-with-count lput (list ? 0) mates-with-count
+  ]
 end
 
 to move  ;; turtle procedure
   rt random-float 180 - 90
-  ;let x mean [dx] of turtles
-  ;let y mean [dy] of turtles
-  ;facexy x y
-  ;rt random 180 - 180
   if has-token?
   [
     face min-one-of mates [distance self]
@@ -146,8 +144,7 @@ to check-salut
           ask self [salut monkey]
         ]
     ]
-  ] ;;verifier si le singe rencontré a plus de force que le leader et le saluer
-    ;;cela fait perdre le token
+  ]
 end
 
 to salut [monkey]
@@ -155,7 +152,19 @@ to salut [monkey]
   set saluts-count (saluts-count + 1)
   ask monkey [set strength strength + (strength-per-salut / 20)]
   ask monkey [set salut-count (salut-count + 1)]
-  ask patch-here [set pcolor blue]
+  ;ask patch-here [set pcolor blue]
+  let temp (list)
+  foreach mates-with-count
+  [
+    ifelse [name] of (first ?) = [name] of monkey
+    [
+      set temp lput (list (first ?) ((first (butfirst ?)) + 1)) temp
+    ]
+    [
+     set temp lput ? temp
+    ]
+    set mates-with-count temp
+  ]
 end
 
 to decrease-leader-strength-memory
@@ -172,13 +181,13 @@ to fight
       let monkey one-of monkeys
       if abs ([strength] of monkey - strength) < 50
         [
-          ask patch-here [set pcolor red]
+          ;ask patch-here [set pcolor red]
           ifelse random combat-ability + strength > random [combat-ability] of monkey + [strength] of monkey
           [
             set strength strength + (strength-per-salut * 1.5 / 20)
           ]
           [
-            ask monkey [set strength strength - (strength / 4) + salut-receptiveness]
+            ask monkey [set strength strength - (strength / 4) + charisma]
           ]
         ]
     ]
@@ -222,11 +231,38 @@ to time
     ]
     ask turtles [set salut-count 0]
     set saluts-count 0
-   ; ask turtles [
-   ;   set strength strength - 1
-   ;   set leader-strength leader-strength - 1
-   ; ]
   ]
+end
+
+to draw-relations
+  let xtemp [xcor] of self
+  let ytemp [ycor] of self
+  let tempcolor [color] of self
+
+  set size (strength / 200) + 1
+
+  foreach mates-with-count
+  [
+    if saluts-count > 0
+    [
+      set color [color] of (first ?)
+      set pen-size ((first (butfirst ?)) / saluts-count)
+      pd
+      setxy [xcor] of (first ?) [ycor] of (first ?)
+      pu
+    ]
+  ]
+  set color tempcolor
+  setxy xtemp ytemp
+end
+
+to erase-relations
+  let xtemp [xcor] of self
+  let ytemp [ycor] of self
+  set pen-size 500
+  pe
+  setxy 0 0
+  setxy xtemp ytemp
 end
 
 to plot-strength
@@ -253,26 +289,18 @@ to plot-time-as-leader
     set-current-plot-pen name
     set-plot-pen-color color
     set-plot-x-range (total-tick-count - 1000) total-tick-count
-   ; print number-of-ticks-as-leader
     plot (number-of-ticks-as-leader / total-tick-count) * 100
   ]
 end
 
 to export-results
-  file-open (word "out.txt")
- ; file-print strength-per-salut
- ; file-print ticks-per-day
- ; file-print memory-of-strength-decay
+  file-open (word "out1.txt")
   ask turtles [export-monkey]
   file-close
 end
 
 to export-monkey
-;  file-print "**************"
-;  file-print name
-;  file-print combat-ability
-;  file-print salut-receptiveness
-  file-print (word combat-ability " " salut-receptiveness " " ((number-of-ticks-as-leader / total-tick-count) * 100))
+  file-print (word (combat-ability / 2) " " (charisma + 50) " " ((number-of-ticks-as-leader / total-tick-count) * 100))
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -457,8 +485,8 @@ MONITOR
 474
 715
 519
-leader salut-receptiveness
-[salut-receptiveness] of leader
+leader charisma
+[charisma] of leader
 17
 1
 11
@@ -479,7 +507,7 @@ MONITOR
 474
 848
 519
-NIL
+leader name
 [name] of leader
 17
 1
@@ -511,7 +539,7 @@ simulations-count
 simulations-count
 1
 100
-0
+37
 1
 1
 NIL
@@ -533,123 +561,6 @@ NIL
 HORIZONTAL
 
 @#$#@#$#@
-## WHAT IS IT?
-
-This model simulates the spread of the human immunodeficiency virus (HIV), via sexual transmission, through a small isolated human population.  It therefore illustrates the effects of certain sexual practices across a population.
-
-As is well known now, HIV is spread in a variety of ways of which sexual contact is only one.  HIV can also be spread by needle-sharing among injecting drug users, through blood transfusions (although this has become very uncommon in countries like the United States in which blood is screened for HIV antibodies), or from HIV-infected women to their babies either before or during birth, or afterwards through breast-feeding.  This model focuses only on the spread of HIV via sexual contact.
-
-The model examines the emergent effects of four aspects of sexual behavior.  The user controls the population's tendency to practice abstinence, the amount of time an average "couple" in the population will stay together, the population's tendency to use condoms, and the population's tendency to get tested for HIV.  Exploration of the first and second variables may illustrate how changes in sexual mores in our society have contributed to increases in the prevalence of sexually transmitted diseases, while exploration of the third and fourth may provide contemporary solutions to the problem.
-
-By allowing the user to control how often an average individual will choose to be tested, the user can explore an important dimension of HIV's threat to public health.  Because the virus does not make itself immediately known in its host, individuals are often infected for some time before a test or immune deficiency symptoms (which leads to a test) identifies them as such.  Regular identification of individuals infected by the virus could have significant public health impacts if knowledge of the infection positively affected sexual behaviors.  This model explores this possibility by making all individuals who know of their positive HIV status always practice safe sex.
-
-## HOW IT WORKS
-
-The model uses "couples" to represent two people engaged in sexual relations.  Individuals wander around the world when they are not in couples.  Upon coming into contact with a suitable partner, there is a chance the two individuals will "couple" together.  When this happens, the two individuals no longer move about, they stand next to each other holding hands as a representation of two people in a sexual relationship.
-
-The presence of the virus in the population is represented by the colors of individuals. Three colors are used: green individuals are uninfected, blue individuals are infected but their infection is unknown, and red individuals are infected and their infection is known.
-
-## HOW TO USE IT
-
-The SETUP button creates individuals with particular behavioral tendencies according to the values of the interface's five sliders (described below).  Once the simulation has been setup, you are now ready to run it, by pushing the GO button.  GO starts the simulation and runs it continuously until GO is pushed again.  During a simulation initiated by GO, adjustments in sliders can affect the behavioral tendencies of the population.
-
-A monitor shows the percent of the population that is infected by HIV.  In this model each time-step is considered one week; the number of weeks that have passed is shown in the toolbar.
-
-Here is a summary of the sliders in the model.  They are explained in more detail below.
-
-- INITIAL-PEOPLE: How many people simulation begins with.
-- AVERAGE-COUPLING-TENDENCY: General likelihood member of population has sex (0--10).
-- AVERAGE-COMMITMENT: How many weeks sexual relationships typically lasts (0--200).
-- AVERAGE-CONDOM-USE: General chance member of population uses a condom. (0--10).
-- AVERAGE-TEST-FREQUENCY: Average frequency member of population will check their HIV status in a 1-year time period (0--2).
-
-The total number of individuals in the simulation is controlled by the slider INITIAL-PEOPLE (initialized to vary between 50--500), which must be set before SETUP is pushed.
-
-During the model's setup procedures, all individuals are given "tendencies" according to four additional sliders.  These tendencies are generally assigned in a normal distribution, so that, for instance, if a tendency slider is set at 8, the most common value for that tendency in the population will be 8.  Less frequently, individuals will have values 7 or 9 for that tendency, and even less frequently will individuals have values 6 or 10 (and so on).
-
-The slider AVERAGE-COUPLING-TENDENCY (0--10) determines the tendency of the individuals to become involved in couples (as stated earlier, all couples are presumed to be sexually active). When the AVERAGE-COUPLING-TENDENCY slider is set at zero, coupling is unlikely, although (because tendencies are assigned in a normal distribution) it is still possible.  Note that when deciding to couple, both individuals involved must be "willing" to do so, so high coupling tendencies in two individuals are actually compounded (i.e. two individuals with a 50% chance of coupling actually only have a 25% of coupling in a given tick).
-
-The slider AVERAGE-COMMITMENT (1--200) determines how long individuals are likely to stay in a couple (in weeks).  Again, the tendencies of both individuals in a relationship are considered; the relationship only lasts as long as is allowed by the tendency of the partner with a shorter commitment tendency.
-
-The slider AVERAGE-CONDOM-USE (0--10) determines the tendency of individuals in the population to practice safe sex.  If an individual uses a condom, it is assumed in this model that no infection by HIV is possible.  Note that this tendency (like the others) is probabilistic at several levels.  For instance, when AVERAGE-CONDOM-USE is set to 9, most of the individuals have a CONDOM-USE value of 9, although some have CONDOM-USE values of 8 or 10, and fewer yet have CONDOM-USE values of 7 or 11 (11 would be off-scale and the same as 10 for all practical purposes).  Also, an individual with a CONDOM-USE value of 9 will still sometimes not choose to use a condom (10% of the time, roughly). Simulation of condom-use is further complicated by the fact that if one partner "wants" to use a condom while the other partner does not, the couple does not use condoms.  This characteristic of the model is representative of the dynamics of some sexual relations, but not others.  The decision was somewhat arbitrary, and the user is invited to play with this characteristic and others in the "Extending the Model" section of this tab.
-
-The slider AVERAGE-TEST-FREQUENCY (0--2) is the final slider of the interface.  It determines the average frequency of an individual to get tested for HIV in a one-year time span.  Set at 1.0, the average person will get tested for HIV about once a year.  Set at 0.2, the average individual will only get tested about every five years.  This tendency has significant impact because the model assumes that individuals who know that they are infected always practice safe sex, even if their tendency as healthy individuals was different.  Again, this characteristic of the model is only represented of the behaviors of some individuals.  The model was designed in this way to highlight the public health effects associated with frequent testing *and* appropriate responses to knowledge of one's HIV status.  To explore the impact of alternative behaviors on public health, the model code can be changed relatively painlessly.  These changes are described in the section, "Extending the Model."
-
-The model's plot shows the total number of uninfected individuals (green), infected individuals whose positive status is not known (blue), and infected individuals whose positive status is known (red).
-
-## THINGS TO NOTICE
-
-Set the INITIAL-PEOPLE slider to 300, AVERAGE-COUPLING-TENDENCY to 10, AVERAGE-COMMITMENT to 100, and the other two sliders to 0. Push SETUP and then push GO. Notice that many individuals rapidly pair up into stationary "couples", with the patches behind them turned a dark gray.  These couples represent sexual activity between the two individuals.  Individuals that continue to move about (and do not have a gray patch behind them) are not engaging in sexual relations.  With RELATIONSHIP-DURATION set to 100, an average individual will have monogamous sexual relations with a partner for about 100 weeks (approximately 2 years) before ending the sexual relationship and searching out a new partner.
-
-Stop the simulation (by pressing the GO button once again), move the AVERAGE-COUPLING-TENDENCY slider to 0, push SETUP, and start the simulation again (with the GO button).  Notice that this time, couples are not forming.  With a low COUPLING-TENDENCY, individuals do not choose to have sex, which in this model is depicted by the graphical representation of couplehood.  Notice that with these settings, HIV does not typically spread. However, spreading could happen since the population's tendency is set according to a normal distribution and a few people will probably have COUPLING-TENDENCY values above 0 at this setting.
-
-Again reset the simulation, this time with AVERAGE-COUPLING-TENDENCY set back to 10 and AVERAGE-COMMITMENT set to 1.  Notice that while individuals do not stand still next to each other for any noticeable length of time, coupling is nevertheless occurring.  This is indicated by the occasional flash of dark gray behind individuals that are briefly next to one another.  Notice that the spread of HIV is actually faster when RELATIONSHIP-DURATION is very short compared to when it is very long.
-
-Now run a simulation with AVERAGE-COMMITMENT equal to 1, AVERAGE-COUPLING-TENDENCY set to 1, AVERAGE-CONDOM-USE set to 10, and AVERAGE-TEST-FREQUENCY set to 1.0. With negligible couple formation and high condom use anyway, there should be no spread of HIV.  Notice how pale blue "infection unknown" individuals turn red much quicker in this simulation.  When the individuals turn red, they know their HIV status.  Some individuals turn red because they have been infected for long enough that they develop symptoms, which alerts them to the need for an HIV test.  Others become red because they choose to be tested.  With AVERAGE-TEST-FREQUENCY set to 1.0, healthy individuals are also being tested, but their color does not change since the tests come back negative.
-
-When all the individuals in the simulation are either green or red, change the sliders without stopping the simulation.  Set AVERAGE-COUPLING-TENDENCY to 10, AVERAGE-COMMITMENT to 100, AVERAGE-CONDOM-USE to 0, and AVERAGE-TEST-FREQUENCY to 0.  Notice that despite the immediate formation of couples and the fact that condom-use tendency is presumably very low, some between healthy (green) individuals and infected (red) individuals, no spread of HIV occurs.  This is because while the model expects HIV positive individuals to continue to engage in sexual relations, it presumes that those individuals will always use condoms and that the condoms will always work.  The rationale for this design is discussed briefly in the "What is it?" section of this tab.
-
-Finally, set INITIAL-PEOPLE to 500 to notice that couples can form on top of each other.  Watch the simulation until you see individuals by themselves, but standing still and with a gray patch behind them indicating coupling.  Underneath one of its neighbors, is the individuals partner.  This apparent bug in the program is necessary because individuals need to be able to couple fairly freely.  If space constraints prohibited coupling, unwanted emergent behavior would occur with high population densities.
-
-Couples are formed by a partnership of "righty" and "lefty" shapes which is not immediately noticeable.  These shapes are not intended to represent genders in any fashion, but merely to provide a useful way to depict couple graphics. In order for the hands of a righty and lefty to match up, both must be off-centered in their patch.  Without this feature, two couples next to each other would appear to be a line of four individuals (instead of two groups of two).  It is intended that the differences between righty and lefty shapes not be especially apparent in order to prevent unintended associations with gender.  Any righty or lefty shape can be thought of as male or female or neither.
-
-## THINGS TO TRY
-
-Run a number of experiments with the GO button to find out the effects of different variables on the spread of HIV.  Try using good controls in your experiment.  Good controls are when only one variable is changed between trials.  For instance, to find out what effect the average duration of a relationship has, run four experiments with the AVERAGE-COMMITMENT slider set at 1 the first time, 2 the second time, 10 the third time, and 50 the last.  How much does the prevalence of HIV increase in each case?  Does this match your expectations?
-
-Are the effects of some slider variables mediated by the effects of others?  For instance, if lower AVERAGE-COMMITMENT values seem to increase the spread of HIV when all other sliders are set at 0, does the same thing occur if all other sliders are set at 10?  You can run many experiments to test different hypotheses regarding the emergent public health effects associated with individual sexual behaviors.
-
-## EXTENDING THE MODEL
-
-Like all computer simulations of human behaviors, this model has necessarily simplified its subject area substantially.  The model therefore provides numerous opportunities for extension:
-
-The model depicts sexual activity as two people standing next to each other.  This suggests that all couples have sex and that abstinence is only practiced in singlehood.  The model could be changed to reflect a more realistic view of what couples are.  Individuals could be in couples without having sex.  To show sex, then, a new graphical representation would have to be employed.  Perhaps sex could be symbolized by having the patches beneath the couple flash briefly to a different color.
-
-The model does not distinguish between genders.  This is an obvious over-simplification chosen because making an exclusively heterosexual model was untenable while making one that included a variety of sexual preferences might have distracted from the public health issues which it was designed to explore.  However, extending the model by adding genders would make the model more realistic.
-
-The model assumes that individuals who are aware that they are infected always practice safe sex.  This portrayal of human behavior is clearly not entirely realistic, but it does create interesting emergent behavior that has genuine relevance to certain public health debate.  However, an interesting extension of the model would be to change individuals' reactions to knowledge of HIV status.
-
-The model assumes that condom use is always 100% effective.  In fact, responsible condom use is actually slightly less than ideal protection from the transmission of HIV.  Add a line of code to the INFECT procedure to check for a slight random chance that a particular episode of condom-use is not effective.  Another change that can be made in the INFECT procedure regards a couple's choice of condom-use.  In this model, when the two partners of a couple "disagree" about whether or not to use a condom, the partner that doesn't wish to use a condom makes the choice.  The opposite possibility is also valid.
-
-Finally, certain significant changes can easily be made in the model by simply changing the value of certain global variables in the procedure SETUP-GLOBALS.  Two variables set in this procedure that are especially worthy of investigation are INFECTION-CHANCE and SYMPTOMS-SHOW.  The former controls what chance an infection has of spreading from an infected to an uninfected partner if no protection is used.  The variable is currently set to 50, meaning that in a week of sexual relations, the chance of infection occurring is 50%.  It is not clear at this time how realistic that figure is. SYMPTOMS-SHOW is the variable that controls how long, on average, a person will have the HIV virus before symptoms begin to appear, alerting that person to the presence of some health problem.  It is currently set to 200 (weeks) in this model.
-
-## NETLOGO FEATURES
-
-Notice that the four procedures that assign the different tendencies generate many small random numbers and add them together.  This produces a normal distribution of tendency values.  A random number between 0 and 100 is as likely to be 1 as it is to be 99. However, the sum of 20 numbers between 0 and 5 is much more likely to be 50 than it is to be 99.
-
-Notice that the global variables SLIDER-CHECK-1, SLIDER-CHECK-2, and so on are assigned with the values of the various sliders so that the model can check the sliders against the variables while the model is running.  Every time-step, a slider's value is checked against a global variable that holds the value of what the slider's value was the time-step before.  If the slider's current value is different than the global variable, NetLogo knows to call procedures that adjust the population's tendencies.  Otherwise, those adjustment procedures are not called.
-
-## CREDITS AND REFERENCES
-
-Special thanks to Steve Longenecker for model development.
-
-## HOW TO CITE
-
-If you mention this model or the NetLogo software in a publication, we ask that you include the citations below.
-
-For the model itself:
-
-* Wilensky, U. (1997).  NetLogo AIDS model.  http://ccl.northwestern.edu/netlogo/models/AIDS.  Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
-
-Please cite the NetLogo software as:
-
-* Wilensky, U. (1999). NetLogo. http://ccl.northwestern.edu/netlogo/. Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
-
-## COPYRIGHT AND LICENSE
-
-Copyright 1997 Uri Wilensky.
-
-![CC BY-NC-SA 3.0](http://ccl.northwestern.edu/images/creativecommons/byncsa.png)
-
-This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 License.  To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA.
-
-Commercial licenses are also available. To inquire about commercial licenses, please contact Uri Wilensky at uri@northwestern.edu.
-
-This model was created as part of the project: CONNECTED MATHEMATICS: MAKING SENSE OF COMPLEX PHENOMENA THROUGH BUILDING OBJECT-BASED PARALLEL MODELS (OBPML).  The project gratefully acknowledges the support of the National Science Foundation (Applications of Advanced Technologies Program) -- grant numbers RED #9552950 and REC #9632612.
-
-This model was converted to NetLogo as part of the projects: PARTICIPATORY SIMULATIONS: NETWORK-BASED DESIGN FOR SYSTEMS LEARNING IN CLASSROOMS and/or INTEGRATED SIMULATION AND MODELING ENVIRONMENT. The project gratefully acknowledges the support of the National Science Foundation (REPP & ROLE programs) -- grant numbers REC #9814682 and REC-0126227. Converted from StarLogoT to NetLogo, 2001.
-
-<!-- 1997 2001 -->
 @#$#@#$#@
 default
 true
