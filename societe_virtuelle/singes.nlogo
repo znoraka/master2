@@ -1,3 +1,5 @@
+extensions [table]
+
 globals [
   tick-count
   days
@@ -5,6 +7,8 @@ globals [
   total-tick-count
   saluts-count
   leader
+  i-count
+  last-tick
 ]
 
 turtles-own [
@@ -23,6 +27,8 @@ turtles-own [
   last-saluts-mean
   charisma
   number-of-ticks-as-leader
+  x
+  y
 ]
 
 to setup
@@ -66,6 +72,15 @@ to setup-monkeys
       set turtle-id turtle-id + 1
       set salut-count-list (list 0)
       set strengths-list (list 0)
+
+      set x sin ((360 / (count turtles)) * i-count) * 6
+      set y cos ((360 / (count turtles)) * i-count) * 6
+
+      print x
+      print y
+      print "****"
+
+      set i-count (i-count + 1)
     ]
 end
 
@@ -74,16 +89,16 @@ end
 ;;;
 
 to go
-  ask turtles [erase-relations]
+  if display-relations? [ask turtles [erase-relations]]
   ask turtles [move]
-  if combat-on? [ask turtles [fight]]
+  ask turtles [fight]
   ask turtles [check-salut]
   ask turtles [check-strength]
   ask turtles [decrease-leader-strength-memory]
   ask turtles [plot-strength]
   ask turtles [plot-saluts]
   ask turtles [plot-time-as-leader]
-  ask turtles [draw-relations]
+  if display-relations? [ask turtles [draw-relations]]
   time
   set leader turtles with-max [strength]
   ask leader [
@@ -107,10 +122,14 @@ end
 to set-mates
   set mates-with-count (list)
   set mates turtles with [name != [name] of myself]
+  let i 0
+  let temp (list)
+  let dict table:make
   foreach [self] of (turtles with [name != [name] of myself])
   [
-    set mates-with-count lput (list ? 0) mates-with-count
+    table:put dict ([name] of ?) (list ? 0 1)
   ]
+  set mates-with-count dict
 end
 
 to move  ;; turtle procedure
@@ -153,18 +172,8 @@ to salut [monkey]
   ask monkey [set strength strength + (strength-per-salut / 20)]
   ask monkey [set salut-count (salut-count + 1)]
   ;ask patch-here [set pcolor blue]
-  let temp (list)
-  foreach mates-with-count
-  [
-    ifelse [name] of (first ?) = [name] of monkey
-    [
-      set temp lput (list (first ?) ((first (butfirst ?)) + 1)) temp
-    ]
-    [
-     set temp lput ? temp
-    ]
-    set mates-with-count temp
-  ]
+  let temp table:get mates-with-count [name] of monkey
+  table:put mates-with-count ([name] of monkey) (list (first temp) min (list 10 ((first (butfirst temp)) + 1)) 1)
 end
 
 to decrease-leader-strength-memory
@@ -223,6 +232,18 @@ to time
       if length salut-count-list > 10
       [
         set salut-count-list butfirst salut-count-list
+        foreach table:keys mates-with-count
+        [
+          let temp table:get mates-with-count ?
+          ifelse first bf bf temp = 1
+          [
+            table:put mates-with-count ? (list (first temp) (first (butfirst temp)) 0)
+          ]
+          [
+            table:put mates-with-count ? (list (first temp) (max (list ((first (butfirst temp)) - 1) 0)) 0)
+          ]
+
+        ]
       ]
       if length strengths-list > 10
       [
@@ -235,20 +256,23 @@ to time
 end
 
 to draw-relations
-  let xtemp [xcor] of self
-  let ytemp [ycor] of self
+  let xtemp xcor
+  let ytemp ycor
+
   let tempcolor [color] of self
 
   set size (strength / 200) + 1
-
-  foreach mates-with-count
+  foreach table:keys mates-with-count
   [
+    setxy x y
+    let temp table:get mates-with-count ?
+   ; print butfirst temp
     if saluts-count > 0
     [
-      set color [color] of (first ?)
-      set pen-size ((first (butfirst ?)) / saluts-count)
+      set color [color] of (first temp)
+      set pen-size ((first (butfirst temp)) * 20 / (count turtles)) + 3
       pd
-      setxy [xcor] of (first ?) [ycor] of (first ?)
+      setxy [x] of (first temp) [y] of (first temp)
       pu
     ]
   ]
@@ -259,9 +283,14 @@ end
 to erase-relations
   let xtemp [xcor] of self
   let ytemp [ycor] of self
-  set pen-size 500
-  pe
-  setxy 0 0
+  if last-tick != total-tick-count
+  [
+    set pen-size 500
+    pe
+    setxy 0 0
+    set last-tick total-tick-count
+    pu
+  ]
   setxy xtemp ytemp
 end
 
@@ -494,10 +523,10 @@ leader charisma
 SWITCH
 13
 253
-154
+194
 286
-combat-on?
-combat-on?
+display-relations?
+display-relations?
 0
 1
 -1000
