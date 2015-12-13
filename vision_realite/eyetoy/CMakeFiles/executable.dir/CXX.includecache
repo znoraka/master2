@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/noe/Documents/dev/master2/vision_realite/eyetoy/main.cpp
+opencv2/opencv.hpp
+/home/noe/Documents/dev/master2/vision_realite/eyetoy/opencv2/opencv.hpp
+algorithm
+-
+functional
+-
+
