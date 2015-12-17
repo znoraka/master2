@@ -5,6 +5,7 @@
 #include <functional>
 #include <algorithm>
 #include <string>
+#include <set>
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/objdetect/objdetect.hpp"
@@ -22,7 +23,7 @@ class HandDetection {
   void computeBackground();
   void computeBackgroundMask(Mat frame, int thy, int thcb);
   void extractColorSamples(Mat frame, Mat mask);
-  int containsHand(Mat frame);
+  int extractFingerCount(Mat frame);
   void filterColorSamples();
   void extractHand(Mat frame);
   

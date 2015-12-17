@@ -25,6 +25,8 @@ algorithm
 -
 string
 -
+set
+-
 opencv2/opencv.hpp
 /home/noe/Documents/dev/master2/vision_realite/eyetoy/opencv2/opencv.hpp
 opencv2/objdetect/objdetect.hpp
@@ -60,6 +62,8 @@ functional
 algorithm
 -
 string
+-
+set
 -
 opencv2/opencv.hpp
 opencv2/opencv.hpp

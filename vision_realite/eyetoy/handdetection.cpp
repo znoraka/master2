@@ -158,15 +158,15 @@ void HandDetection::detect(Mat frame) {
       computeBackgroundMask(tempFrame.clone(), 14, 14);
     }
     Mat tempBackground = backgroundMask.clone();
+    erode(backgroundMask, backgroundMask, Mat());
+    erode(backgroundMask, backgroundMask, Mat());
+    erode(backgroundMask, backgroundMask, Mat());
 
-    findContours( backgroundMask, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_TC89_L1, Point(0, 0) );
+    dilate(backgroundMask, backgroundMask, Mat());
+    dilate(backgroundMask, backgroundMask, Mat());
+    dilate(backgroundMask, backgroundMask, Mat());
 
-    dilate(backgroundMask, backgroundMask, Mat());
-    dilate(backgroundMask, backgroundMask, Mat());
-    dilate(backgroundMask, backgroundMask, Mat());
-    erode(backgroundMask, backgroundMask, Mat());
-    erode(backgroundMask, backgroundMask, Mat());
-    erode(backgroundMask, backgroundMask, Mat());
+    findContours( backgroundMask, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_TC89_L1, Point(0, 0) );
     
     if(contours.size() > 0) {
       vector<vector<Point> >hull( contours.size() );
@@ -176,7 +176,20 @@ void HandDetection::detect(Mat frame) {
 	  return a.size() > b.size();
 	});
 
+      Mat handMask = Mat::zeros( frame.size(), CV_8UC1 );
       extractHand(tempFrame);
+
+      dilate(handMask, handMask, Mat());
+      dilate(handMask, handMask, Mat());
+      dilate(handMask, handMask, Mat());
+      // erode(handMask, handMask, Mat());
+      // erode(handMask, handMask, Mat());
+      // erode(handMask, handMask, Mat());
+
+      drawContours( handMask, contours, -1, Scalar(255, 255, 255), CV_FILLED, 8, vector<Vec4i>(), 0, Point() );
+      
+      findContours( handMask, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_TC89_L1, Point(0, 0) );
+      contours.resize(1);
       
       //ne garder que le contour avec les plus de points pour éliminer le bruit
       // contours.resize(1);
@@ -187,20 +200,18 @@ void HandDetection::detect(Mat frame) {
 	  convexHull( Mat(contours[i]), hullI[i], false ); 
 	}
 
-	Mat handMask = Mat::zeros( frame.size(), CV_8UC3 );
+	if(hull.size() < 2) return;
 	
 	//affichage des contours/enveloppes convexes
-	for( int i = 0; i< contours.size(); i++ ) {
-	  drawContours( frame, contours, i, Scalar(255, 0, 0), 3, 8, vector<Vec4i>(), 0, Point() );
-	  drawContours( frame, hull, i, Scalar(255, 255, 255), 2, 8, vector<Vec4i>(), 0, Point() );
-	  drawContours( handMask, contours, i, Scalar(255, 255, 255), CV_FILLED, 8, vector<Vec4i>(), 0, Point() );
-	}
+	drawContours( frame, contours, -1, Scalar(255, 0, 0), 3, 8, vector<Vec4i>(), 0, Point() );
+	drawContours( frame, hull, -1, Scalar(255, 255, 255), 2, 8, vector<Vec4i>(), 0, Point() );
+	drawContours( handMask, contours, -1, Scalar(255, 255, 255), CV_FILLED, 8, vector<Vec4i>(), 0, Point() );
 	defects.clear();
 	defects.resize(contours.size());
   
 	convexityDefects(Mat(contours[0]), hullI[0], defects[0]);
 
-	int fingerCount = containsHand(frame);
+	int fingerCount = extractFingerCount(frame);
 
 	std::string s;
 
@@ -213,12 +224,6 @@ void HandDetection::detect(Mat frame) {
 	}
 
 	putText(frame, s, Point2f(100,100), FONT_HERSHEY_PLAIN, 2,  Scalar(0,0,255,255));
-
-	if(containsHand(frame) && filteredColorSamples.size() == 0) {
-	  // std::cout << "found hand!" << std::endl;
-	  // extractColorSamples(temp.clone(), handMask);
-	  // extractColorSamples(tempFrame.clone(), handMask);
-	}
 
 	Mat y(frame.rows, frame.cols, CV_8UC1);
 	Mat cr(frame.rows, frame.cols, CV_8UC1);
@@ -243,9 +248,6 @@ void HandDetection::detect(Mat frame) {
 	// imshow( "Background Mask", background);
 
 	resizeWindow("Background Mask", frame.rows * 0.7, frame.rows * 0.7);
-
-	// adaptiveThreshold(tempFrame, y, 255,  double maxValue, int adaptiveMethod, int thresholdType, int blockSize, double C);
-	// adaptiveThreshold(y, y,255,CV_ADAPTIVE_THRESH_MEAN_C, ADAPTIVE_THRESH_GAUSSIAN_C, 17, 6);
 
 	// namedWindow( "y", CV_WINDOW_NORMAL);
 	// imshow( "y", y);
@@ -300,42 +302,26 @@ void HandDetection::filterColorSamples() {
 
 
 void HandDetection::computeBackgroundMask(Mat frame, int thy = 10, int thcb = 10) {
-  if(filteredColorSamples.size() == 0) {
-    for (int i = 0; i < frame.rows; i++) {
-      for (int j = 0; j < frame.cols; j++) {
-	Vec<uchar, 3> om = frame.at<Vec<uchar, 3> >(i, j);
-	Vec<uchar, 3> cm = background.at<Vec<uchar, 3> >(i, j);
-	if(abs(om[0] - cm[0]) < thy && abs(om[2] - cm[2]) < thcb) {
-	  backgroundMask.at<uchar>(i, j) = 0;
-	} else {
-	  backgroundMask.at<uchar>(i, j) = 255;
-	}
-      }
-    }
-  } else {
-    Mat m = backgroundMask.clone();
-    for (int i = 0; i < frame.rows; i++) {
-      for (int j = 0; j < frame.cols; j++) {
+  for (int i = 0; i < frame.rows; i++) {
+    for (int j = 0; j < frame.cols; j++) {
+      Vec<uchar, 3> om = frame.at<Vec<uchar, 3> >(i, j);
+      Vec<uchar, 3> cm = background.at<Vec<uchar, 3> >(i, j);
+      if(abs(om[0] - cm[0]) < thy && abs(om[2] - cm[2]) < thcb) {
 	backgroundMask.at<uchar>(i, j) = 0;
-        m.at<uchar>(i, j) = 0;
-	// Scalar s = filteredColorSamples[0];
-	for(Scalar s : filteredColorSamples) {
-	  Vec3b om = frame.at<Vec3b >(i, j);
-	  Vec3b cm; cm[0] = s[0]; cm[1] = s[1]; cm[2] = s[2];
-	  // float dist = sqrt(pow(om[0] - cm[0], 2) + pow(om[1] - cm[1], 2) + pow(om[2] - cm[2], 2));
-	  if(distance(om, cm) < 10 ) {
-	  // if(dist < 15) {
-	    backgroundMask.at<uchar>(i, j) = 255;
-	  }
-	}
+      } else {
+	backgroundMask.at<uchar>(i, j) = 255;
       }
     }
   }
 }
 
-int HandDetection::containsHand(Mat frame) {
-  std::vector<Point> fingerTops;
+int HandDetection::extractFingerCount(Mat frame) {
+  int fingerCount = 0;
+  std::vector<Point> pts;
   float angle;
+
+  Point center;
+  int n = 1;
   
   for (int i = 0; i < defects[0].size(); i++) {
 
@@ -348,21 +334,55 @@ int HandDetection::containsHand(Mat frame) {
     Point p1 = contours[0][startIndex];
     Point p2 = contours[0][endIndex];
     Point p3 = contours[0][farIndex];
+
+    center.x += (p1.x + p2.x + p3.x);
+    center.y += (p1.y + p2.y + p3.y);
     
-    if(depth > 20 && depth < 180) {
+    n += 3;
+
+    pts.push_back(p1);
+    pts.push_back(p2);
+    pts.push_back(p3);
+
+    Vec2i v1 = p3 - p1;
+    Vec2i v2 = p3 - p2;
+
+    float dot = v1[0] * v2[0] + v1[1] * v2[1];
+    float det = v1[0] * v2[1] + v1[1] * v2[0];
+
+    float angle = atan2(det, dot) * 57.2958;
+    Vec2i biggest;
+    if(cv::norm(v1) > cv::norm(v2)) {
+      biggest = v1;
+    } else {
+      biggest = v2;
+    }
+
+    // if(abs(cv::norm(v1) - cv::norm(v2)) < cv::norm(biggest) * 0.3) {
+    if(abs(angle) < 60 && abs(cv::norm(v1) - cv::norm(v2)) < cv::norm(biggest) * 0.3) {
+    // if(depth > 10 && depth < 180) {
 	line( frame, p1, p3, CV_RGB(0,255,0), 2 );
 	line( frame, p2, p3, CV_RGB(0,255,0), 2 );
-	circle( frame, p1, 4, Scalar(100,0,255), 2 );
-        fingerTops.push_back(p1);
+	circle( frame, p3, 4, Scalar(100,0,255), 2 );
+	std::stringstream ss;
+	ss << (int) angle;
+	fingerCount += 1;
+	putText(frame, ss.str(), p3, FONT_HERSHEY_PLAIN, 1,  Scalar(0,0,255,255));
+
     }
   }
-    
-  // if(fingerTops.size() > 5) {
-  //   RotatedRect r = fitEllipse(fingerTops);
-  //   cv::circle(frame,r.center,5,Scalar(255,255,255),-1);
-  // }
 
-  return fingerTops.size();
+  fingerCount += (fingerCount != 0);
+
+  center.x /= n;
+  center.y /= n;
+  std::stringstream ss;
+  ss << fingerCount;
+  
+  putText(frame, ss.str(), Point(20, 20), FONT_HERSHEY_PLAIN, 1,  Scalar(0,0,255,255));
+
+    
+  return fingerCount;
 }
 
 void HandDetection::extractHand(Mat frame) {
@@ -371,6 +391,7 @@ void HandDetection::extractHand(Mat frame) {
   
   for( int i = 0; i < 2; i++ ) {
     Mat mask = Mat::zeros( frame.size(), CV_8UC3 );
+    if(contours.size() <= i) return;
     drawContours( mask, contours, i, Scalar(255, 255, 255), CV_FILLED, 8, vector<Vec4i>(), 0, Point() );
     std::vector<double> vr;
     std::vector<double> vg;
