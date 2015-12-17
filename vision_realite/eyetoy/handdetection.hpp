@@ -10,6 +10,7 @@
 #include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/features2d/features2d.hpp"
 
 using namespace cv;
 
@@ -23,6 +24,7 @@ class HandDetection {
   void extractColorSamples(Mat frame, Mat mask);
   bool containsHand(Mat frame);
   void filterColorSamples();
+  void extractHand(Mat frame);
   
  private:
   Mat background;
@@ -40,6 +42,7 @@ class HandDetection {
   int n;
   
   std::vector<std::vector<Point> > contours;
+  std::vector<Point> contour;
   std::vector<Vec4i> hierarchy;
   std::vector<std::vector<Vec4i> > defects;
   std::vector<Scalar> colorSamples;

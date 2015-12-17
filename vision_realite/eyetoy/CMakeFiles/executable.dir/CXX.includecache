@@ -33,6 +33,8 @@ opencv2/highgui/highgui.hpp
 /home/noe/Documents/dev/master2/vision_realite/eyetoy/opencv2/highgui/highgui.hpp
 opencv2/imgproc/imgproc.hpp
 /home/noe/Documents/dev/master2/vision_realite/eyetoy/opencv2/imgproc/imgproc.hpp
+opencv2/features2d/features2d.hpp
+/home/noe/Documents/dev/master2/vision_realite/eyetoy/opencv2/features2d/features2d.hpp
 
 /home/noe/Documents/dev/master2/vision_realite/eyetoy/main.cpp
 opencv2/opencv.hpp
@@ -67,4 +69,6 @@ opencv2/highgui/highgui.hpp
 opencv2/highgui/highgui.hpp
 opencv2/imgproc/imgproc.hpp
 opencv2/imgproc/imgproc.hpp
+opencv2/features2d/features2d.hpp
+opencv2/features2d/features2d.hpp
 
