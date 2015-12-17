@@ -200,6 +200,20 @@ void HandDetection::detect(Mat frame) {
   
 	convexityDefects(Mat(contours[0]), hullI[0], defects[0]);
 
+	int fingerCount = containsHand(frame);
+
+	std::string s;
+
+	if(fingerCount <= 1) {
+	  s = "Pierre";
+	} else if (fingerCount > 3) {
+	  s = "Feuille";
+	} else {
+	  s = "Ciseaux";
+	}
+
+	putText(frame, s, Point2f(100,100), FONT_HERSHEY_PLAIN, 2,  Scalar(0,0,255,255));
+
 	if(containsHand(frame) && filteredColorSamples.size() == 0) {
 	  // std::cout << "found hand!" << std::endl;
 	  // extractColorSamples(temp.clone(), handMask);
@@ -319,9 +333,8 @@ void HandDetection::computeBackgroundMask(Mat frame, int thy = 10, int thcb = 10
   }
 }
 
-bool HandDetection::containsHand(Mat frame) {
-  std::vector<Point> filtered;
-  std::vector<Point> betweenFingers;
+int HandDetection::containsHand(Mat frame) {
+  std::vector<Point> fingerTops;
   float angle;
   
   for (int i = 0; i < defects[0].size(); i++) {
@@ -339,71 +352,17 @@ bool HandDetection::containsHand(Mat frame) {
     if(depth > 20 && depth < 180) {
 	line( frame, p1, p3, CV_RGB(0,255,0), 2 );
 	line( frame, p2, p3, CV_RGB(0,255,0), 2 );
-	circle( frame, p1,   4, Scalar(100,0,255), 2 );
+	circle( frame, p1, 4, Scalar(100,0,255), 2 );
+        fingerTops.push_back(p1);
     }
-
-    p1 = contours[0][defects[0][i][1]];
-    p2 = contours[0][defects[0][(i+1) % defects[0].size()][2]];
-    p3 = contours[0][defects[0][i][2]];
-  
-    Point v1(p1 - p2);
-    Point v2(p1 - p3);
-
-    float len1 = sqrt(v1.x * v1.x + v1.y * v1.y);
-    float len2 = sqrt(v2.x * v2.x + v2.y * v2.y);
-
-    float dot = v1.x * v2.x + v1.y * v2.y;
-
-    float a = dot / (len1 * len2);
-
-    if (a >= 1.0)
-      angle = 0.0;
-    else if (a <= -1.0)
-      angle = M_PI;
-    else
-      angle = acos(a) * 57,2958;
-
-    std::ostringstream ss;
-    ss << (int)angle;
-
-    putText(frame, ss.str(), p1, FONT_HERSHEY_PLAIN, 1,  Scalar(0,0,255,255), 1);
-
-    if(angle < 40) {
-      filtered.push_back(p1);
-      filtered.push_back(p2);
-      filtered.push_back(p3);
-
-      // int thickness = 2;
-      // int lineType = 8;
-      // line( frame,
-      // 	    p1,
-      // 	    p2,
-      // 	    Scalar( 0, 255, 0 ),
-      // 	    thickness,
-      // 	    lineType );
+  }
     
-      // line( frame,
-      // 	    p1,
-      // 	    p3,
-      // 	    Scalar( 0, 255, 0 ),
-      // 	    thickness,
-      // 	    lineType );
+  // if(fingerTops.size() > 5) {
+  //   RotatedRect r = fitEllipse(fingerTops);
+  //   cv::circle(frame,r.center,5,Scalar(255,255,255),-1);
+  // }
 
-      // cv::circle(frame,p1,3,Scalar(0,0,255),-1);
-      // cv::circle(frame,p2,3,Scalar(0,255,255),-1);
-      // cv::circle(frame,p3,5,Scalar(0,0,255),-1);
-
-      // std::cout << filtered.size() << std::endl;
-      betweenFingers.push_back(p3);
-    }
-  }
-
-  if(betweenFingers.size() > 5) {
-    RotatedRect r = fitEllipse(betweenFingers);
-    cv::circle(frame,r.center,5,Scalar(255,255,255),-1);
-  }
-
-  return filtered.size() > 12;
+  return fingerTops.size();
 }
 
 void HandDetection::extractHand(Mat frame) {

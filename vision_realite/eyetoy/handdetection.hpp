@@ -22,7 +22,7 @@ class HandDetection {
   void computeBackground();
   void computeBackgroundMask(Mat frame, int thy, int thcb);
   void extractColorSamples(Mat frame, Mat mask);
-  bool containsHand(Mat frame);
+  int containsHand(Mat frame);
   void filterColorSamples();
   void extractHand(Mat frame);
   
