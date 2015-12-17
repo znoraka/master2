@@ -51,6 +51,8 @@ cstdlib
 -
 iostream
 -
+string
+-
 ctime
 -
 

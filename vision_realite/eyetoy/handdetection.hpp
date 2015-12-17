@@ -15,10 +15,12 @@
 
 using namespace cv;
 
+enum HandGesture {PIERRE, FEUILLE, CISEAUX, ERROR };
+
 class HandDetection {
  public:
   HandDetection(int rows, int cols);
-  void detect(Mat frame);
+  HandGesture detect(Mat frame);
   void updateBackground(Mat frame);
   void computeBackground();
   void computeBackgroundMask(Mat frame, int thy, int thcb);

@@ -1,0 +1,11 @@
+\beamer@endinputifotherversion {3.36pt}
+\select@language {french}
+\beamer@sectionintoc {1}{Pr\IeC {\'e}sentation du sujet}{2}{0}{1}
+\beamer@subsectionintoc {1}{1}{Description du sujet}{3}{0}{1}
+\beamer@subsectionintoc {1}{2}{Technologies}{4}{0}{1}
+\beamer@subsectionintoc {1}{3}{Un changement de projet ?}{5}{0}{1}
+\beamer@subsectionintoc {1}{4}{Pourquoi OpenCV ?}{6}{0}{1}
+\beamer@subsectionintoc {1}{5}{Principes du jeu}{7}{0}{1}
+\beamer@sectionintoc {2}{La detection}{8}{0}{2}
+\beamer@subsectionintoc {2}{1}{Extraction de la main}{9}{0}{2}
+\beamer@subsectionintoc {2}{2}{Analyse de la main}{12}{0}{2}

@@ -91,51 +91,12 @@ void HandDetection::extractColorSamples(Mat frame, Mat mask) {
   colorSamples.push_back(Scalar(avgY, avgCr, avgCb));
 }
 
-void HandDetection::detect(Mat frame) {
-  frameCount = (frameCount + 1) % 30;
-
-  //detection de la tete
-  // if(frameCount == 1) {
-  //   std::vector<Rect> faces;
-  //   face_cascade.detectMultiScale( frame, faces, 1.1, 3, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30) );
-  //   if(faces.size() > 0) {
-  //     for( int i = 0; i < faces.size(); i++ ) {
-  // 	Point center( faces[i].x + faces[i].width*0.5, faces[i].y + faces[i].height*0.5 );
-  // 	ellipse( frame, center, Size( faces[i].width*0.5, faces[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
-  //     }
-  //     face->x = faces[0].x;
-  //     face->y = faces[0].y;
-  //     face->width = faces[0].width;
-  //     face->height = faces[0].height;
-  //   }
-  // }
-  // //soustraction de la tete pour ne pas la confondre avec la main
-  // if(face->width > 0) {
-  //   for (int i = face->y; i < face-> y + face->height; i++) {
-  //     for (int j = face->x; j < face->x + face->width; j++) {
-  // 	Vec3b v = frame.at<Vec3b>(i, j);
-  // 	v[0] = 0;
-  //       v[1] = 0;
-  //       v[2] = 0;
-  // 	frame.at<Vec3b>(i, j) = v;
-  //     }
-  //   }
-  // }
-  // std::stringstream ss;
-  // ss << n;
-  // imwrite( "./hands/hands" + ss.str() + ".jpg", frame);
-
+HandGesture HandDetection::detect(Mat frame) {
   //le bruit se concentre sur Cr
   Mat temp = frame.clone();
   cvtColor(temp, temp, CV_RGB2YCrCb);
   cvtColor(temp, temp, CV_RGB2YCrCb);
   cvtColor(temp, temp, CV_RGB2YCrCb);
-
-  //lorsque l'on a suffisament d'exemple de couleurs pour la main
-  if(colorSamples.size() > 20 && filteredColorSamples.size() == 0) {
-    filterColorSamples();
-    filteredColorSamples.resize(5);
-  }
   
   if(n < 10) {
     //construction du background modele
@@ -191,16 +152,13 @@ void HandDetection::detect(Mat frame) {
       findContours( handMask, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_TC89_L1, Point(0, 0) );
       contours.resize(1);
       
-      //ne garder que le contour avec les plus de points pour éliminer le bruit
-      // contours.resize(1);
-
       if(contours[0].size() > 3) {
 	for( int i = 0; i < contours.size(); i++ ) {
 	  convexHull( Mat(contours[i]), hull[i], false );
 	  convexHull( Mat(contours[i]), hullI[i], false ); 
 	}
 
-	if(hull.size() < 2) return;
+	if(hull.size() < 2) return ERROR;
 	
 	//affichage des contours/enveloppes convexes
 	drawContours( frame, contours, -1, Scalar(255, 0, 0), 3, 8, vector<Vec4i>(), 0, Point() );
@@ -214,16 +172,6 @@ void HandDetection::detect(Mat frame) {
 	int fingerCount = extractFingerCount(frame);
 
 	std::string s;
-
-	if(fingerCount <= 1) {
-	  s = "Pierre";
-	} else if (fingerCount > 3) {
-	  s = "Feuille";
-	} else {
-	  s = "Ciseaux";
-	}
-
-	putText(frame, s, Point2f(100,100), FONT_HERSHEY_PLAIN, 2,  Scalar(0,0,255,255));
 
 	Mat y(frame.rows, frame.cols, CV_8UC1);
 	Mat cr(frame.rows, frame.cols, CV_8UC1);
@@ -245,7 +193,6 @@ void HandDetection::detect(Mat frame) {
 
 	namedWindow( "Background Mask", CV_WINDOW_NORMAL);
 	imshow( "Background Mask", tempBackground);
-	// imshow( "Background Mask", background);
 
 	resizeWindow("Background Mask", frame.rows * 0.7, frame.rows * 0.7);
 
@@ -260,13 +207,19 @@ void HandDetection::detect(Mat frame) {
 	// namedWindow( "cb", CV_WINDOW_NORMAL);
 	// imshow( "cb", cb);
 	// resizeWindow("cb", frame.rows * 0.7, frame.rows * 0.7);
+	
+	if(fingerCount <= 1) {
+	  return PIERRE;
+	} else if (fingerCount > 3) {
+	  return FEUILLE;
+	} else {
+	  return CISEAUX;
+	}
 
-	// extractColorSamples(temp, handMask);
-
-	// imwrite( "./backgrounds/background" + ss.str() + ".jpg", background );
       }
     }
-  }  
+  }
+  return ERROR;
 }
 
 void HandDetection::computeBackground() {
