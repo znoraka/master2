@@ -28,17 +28,6 @@ HandDetection::HandDetection(int rows, int cols) {
   background = Mat(rows, cols, CV_8UC3);
   backgroundMask = Mat(rows, cols, CV_8UC1);
   n = 0;
-  frameCount = 0;
-  face = new Rect(0, 0, 0, 0);
-  std::cout << face_cascade.load("/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml") << std::endl;
-
-  fileHand = imread("./hands.jpg");
-  cvtColor(fileHand, fileHand, CV_RGB2YCrCb);
-  cvtColor(fileHand, fileHand, CV_RGB2YCrCb);
-  cvtColor(fileHand, fileHand, CV_RGB2YCrCb);
-  fileBg = imread("./background.jpg");
-
-
 }
 
 void HandDetection::updateBackground(Mat frame) {
@@ -108,9 +97,6 @@ HandGesture HandDetection::detect(Mat frame) {
     n++;
   } else {
     n++;
-
-    // temp = fileHand.clone();
-    // background = fileBg.clone();
     //calcul du mask
     Mat tempFrame = frame.clone();
     if(filteredColorSamples.size() == 0) {
@@ -143,20 +129,23 @@ HandGesture HandDetection::detect(Mat frame) {
       dilate(handMask, handMask, Mat());
       dilate(handMask, handMask, Mat());
       dilate(handMask, handMask, Mat());
-      // erode(handMask, handMask, Mat());
-      // erode(handMask, handMask, Mat());
-      // erode(handMask, handMask, Mat());
 
       drawContours( handMask, contours, -1, Scalar(255, 255, 255), CV_FILLED, 8, vector<Vec4i>(), 0, Point() );
       
       findContours( handMask, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_TC89_L1, Point(0, 0) );
       contours.resize(1);
+
+      if(contours[0].size() < 100) return ERROR;
       
       if(contours[0].size() > 3) {
 	for( int i = 0; i < contours.size(); i++ ) {
 	  convexHull( Mat(contours[i]), hull[i], false );
 	  convexHull( Mat(contours[i]), hullI[i], false ); 
 	}
+
+	std::stringstream ss;
+	ss << contours[0].size();
+	putText(frame, ss.str(), Point(10, 30), FONT_HERSHEY_PLAIN, 1,  Scalar(0,0,255,255));
 
 	if(hull.size() < 2) return ERROR;
 	
@@ -185,16 +174,17 @@ HandGesture HandDetection::detect(Mat frame) {
 	  }
 	}
 
-	namedWindow( "Hand", CV_WINDOW_AUTOSIZE );
-	imshow( "Hand", frame);
-	namedWindow( "Hand Mask", CV_WINDOW_NORMAL);
-	imshow( "Hand Mask", handMask);
-	resizeWindow("Hand Mask", frame.rows * 0.7, frame.rows * 0.7);
+	handForUi = handMask;
+	// namedWindow( "Hand", CV_WINDOW_AUTOSIZE );
+	// imshow( "Hand", frame);
+	// namedWindow( "Hand Mask", CV_WINDOW_NORMAL);
+	// imshow( "Hand Mask", handMask);
+	// resizeWindow("Hand Mask", frame.rows * 0.7, frame.rows * 0.7);
 
-	namedWindow( "Background Mask", CV_WINDOW_NORMAL);
-	imshow( "Background Mask", tempBackground);
+	// namedWindow( "Background Mask", CV_WINDOW_NORMAL);
+	// imshow( "Background Mask", tempBackground);
 
-	resizeWindow("Background Mask", frame.rows * 0.7, frame.rows * 0.7);
+	// resizeWindow("Background Mask", frame.rows * 0.7, frame.rows * 0.7);
 
 	// namedWindow( "y", CV_WINDOW_NORMAL);
 	// imshow( "y", y);
@@ -310,6 +300,10 @@ int HandDetection::extractFingerCount(Mat frame) {
     } else {
       biggest = v2;
     }
+
+    // circle( frame, p1, 4, Scalar(100,0,255), 2 );
+    // circle( frame, p2, 4, Scalar(100,0,255), 2 );
+    // circle( frame, p3, 4, Scalar(100,0,255), 2 );
 
     // if(abs(cv::norm(v1) - cv::norm(v2)) < cv::norm(biggest) * 0.3) {
     if(abs(angle) < 60 && abs(cv::norm(v1) - cv::norm(v2)) < cv::norm(biggest) * 0.3) {

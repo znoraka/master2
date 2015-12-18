@@ -28,22 +28,16 @@ class HandDetection {
   int extractFingerCount(Mat frame);
   void filterColorSamples();
   void extractHand(Mat frame);
+
+  Mat handForUi;
   
  private:
   Mat background;
   Mat backgroundMask;
   Mat tempBackgroundForSum;
 
-  Mat fileBg;
-  Mat fileHand;
-
-  CascadeClassifier face_cascade;
-
-  Rect *face;
-
-  int frameCount;
   int n;
-  
+
   std::vector<std::vector<Point> > contours;
   std::vector<Point> contour;
   std::vector<Vec4i> hierarchy;

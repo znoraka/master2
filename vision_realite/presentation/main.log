@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2015.11.2)  17 DEC 2015 17:31
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2015.11.2)  17 DEC 2015 23:01
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1177,20 +1177,20 @@ LaTeX Font Warning: Font shape `T1/cmss/m/n' in size <4> not available
 ]
 [3
 
-] <./opencv_logo.png, id=201, 229.8186pt x 74.679pt>
+] <./opencv_logo.png, id=215, 229.8186pt x 74.679pt>
 File: ./opencv_logo.png Graphic file (type png)
  <use ./opencv_logo.png>
 Package pdftex.def Info: ./opencv_logo.png used on input line 57.
 (pdftex.def)             Requested size: 183.85512pt x 59.74326pt.
 
-<./cpp.jpeg, id=203, 434.62375pt x 456.70625pt>
+<./cpp.jpeg, id=217, 434.62375pt x 456.70625pt>
 File: ./cpp.jpeg Graphic file (type jpg)
  <use ./cpp.jpeg>
 Package pdftex.def Info: ./cpp.jpeg used on input line 57.
 (pdftex.def)             Requested size: 86.9232pt x 91.33963pt.
  [4
 
- <./opencv_logo.png> <./cpp.jpeg>] <./cher.png, id=239, 808.01875pt x 410.53375
+ <./opencv_logo.png> <./cpp.jpeg>] <./cher.png, id=255, 808.01875pt x 410.53375
 pt>
 File: ./cher.png Graphic file (type png)
 
@@ -1217,7 +1217,7 @@ Overfull \vbox (4.78629pt too high) detected at line 64
 ] [9
 
 ]
-<background.png, id=416, 995.72pt x 745.78625pt>
+<background.png, id=443, 995.72pt x 745.78625pt>
 File: background.png Graphic file (type png)
  <use background.png>
 Package pdftex.def Info: background.png used on input line 100.
@@ -1225,7 +1225,7 @@ Package pdftex.def Info: background.png used on input line 100.
  [10
 
  <./background.png (PNG copy)>]
-<background_hand.png, id=451, 995.72pt x 745.78625pt>
+<background_hand.png, id=481, 995.72pt x 745.78625pt>
 File: background_hand.png Graphic file (type png)
 
 <use background_hand.png>
@@ -1236,6 +1236,21 @@ Package pdftex.def Info: background_hand.png used on input line 104.
  <./background_hand.png>] [12
 
 ]
+<./unfiltered.png, id=555, 260.975pt x 364.36125pt>
+File: ./unfiltered.png Graphic file (type png)
+ <use ./unfiltered.png>
+Package pdftex.def Info: ./unfiltered.png used on input line 127.
+(pdftex.def)             Requested size: 145.96455pt x 203.79071pt.
+
+<./filtered.png, id=556, 201.75375pt x 287.0725pt>
+File: ./filtered.png Graphic file (type png)
+ <use ./filtered.png>
+Package pdftex.def Info: ./filtered.png used on input line 127.
+(pdftex.def)             Requested size: 145.96455pt x 207.69075pt.
+
+[13
+
+ <./unfiltered.png (PNG copy)> <./filtered.png (PNG copy)>]
 \tf@nav=\write6
 \openout6 = `main.nav'.
 
@@ -1245,31 +1260,25 @@ Package pdftex.def Info: background_hand.png used on input line 104.
 \tf@snm=\write8
 \openout8 = `main.snm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 122.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 122.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 128.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 128.
  (./main.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 122.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 122.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 128.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 128.
+Package rerunfilecheck Info: File `main.out' has not changed.
+(rerunfilecheck)             Checksum: EA73FDD7EB8B848191AB0E9BC0285647;579.
 
-
-Package rerunfilecheck Warning: File `main.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `main.out':
-(rerunfilecheck)             Before: 487408ACB3B08E63A944CABD1F074B67;511
-(rerunfilecheck)             After:  EA73FDD7EB8B848191AB0E9BC0285647;579.
 
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 1.0pt have occurred.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 122.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 128.
  ) 
 Here is how much of TeX's memory you used:
- 18122 strings out of 493085
- 339306 string characters out of 6136917
- 429049 words of memory out of 5000000
- 21149 multiletter control sequences out of 15000+600000
+ 18141 strings out of 493085
+ 339574 string characters out of 6136917
+ 430049 words of memory out of 5000000
+ 21164 multiletter control sequences out of 15000+600000
  8093 words of font info for 21 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  56i,20n,64p,391b,798s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1277,10 +1286,10 @@ Here is how much of TeX's memory you used:
 fonts/type1/public/cm-super/sfss0600.pfb></usr/share/texmf/fonts/type1/public/c
 m-super/sfss0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfss1095.pfb
 ></usr/share/texmf/fonts/type1/public/cm-super/sfss1440.pfb>
-Output written on main.pdf (12 pages, 400654 bytes).
+Output written on main.pdf (13 pages, 587496 bytes).
 PDF statistics:
- 549 PDF objects out of 1000 (max. 8388607)
- 493 compressed objects within 5 object streams
- 34 named destinations out of 1000 (max. 500000)
- 192 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 620 PDF objects out of 1000 (max. 8388607)
+ 558 compressed objects within 6 object streams
+ 36 named destinations out of 1000 (max. 500000)
+ 210 words of extra memory for PDF output out of 10000 (max. 10000000)
 
