@@ -598,9 +598,9 @@ C'est la simulation des interactions entre les individus au sein d'un groupe de 
 
 Les singes, nos tortues, ont chacuns deux caractéristiques, décidées aléatoirement lors de leur création. Le charisme, qui incitera les autres singes à le saluer, et l'abilité au combat, qui derterminera qui sortira vainqueur en cas d'affrontement entre deux singes. C'est donc normalement le singe qui a les caractéristiques les plus élevées qui recevra le plus de salut.
 
-Chaque salut augmente la force du singe, c'est un peu sa confiance en soi, qui diminue petit à petit s'il ne reçoit pas de salut. Ainsi, pour qu'un singe ai confiance en lui, il faut qu'il soit continuellement salué. Un singe ne sera salué par un autre singe que si sa force est plus importante, en prenant en compte le charisme. Dans une société de chimpanzés, lorsque deux individus sont trop proches en rang, des rivalités peuvent se créer, elle seront souvent réglées par un affrontement, l'issue de l'affrontement est déterminé par l'abilité au combat de chacun, ainsi qu'un peu de random. Le vaincu perd de la confiance en soi (de la force) tandis que celle du vainqueur est boostée, on a ainsi un clair vainqueur qui en sort, et qui pourra potentiellement être le leader du groupe.
+Chaque salut augmente la force du singe, c'est un peu sa confiance en soi, qui diminue petit à petit s'il ne reçoit pas de salut. Ainsi, pour qu'un singe ai confiance en lui, il faut qu'il soit continuellement salué. Un singe ne sera salué par un autre singe que si sa force est plus importante, en prenant en compte le charisme. Dans une société de chimpanzés, lorsque deux individus sont trop proches en rang, des rivalités peuvent se créer, elle seront souvent réglées par un affrontement, l'issue de l'affrontement est déterminée par l'abilité au combat de chacun, ainsi qu'un peu de random. Le vaincu perd de la confiance en soi (de la force) tandis que celle du vainqueur est boostée, on a ainsi un clair vainqueur qui en sort, et qui pourra potentiellement être le leader du groupe.
 
-Pour la fluidité de la simulation, un jour est représenté par un certain nombre de ticks, les singes ont un salut par jour, qu'ils choisirons de donner à celui qui leur semble le mériter le plus, c'est à dire le singe  qu'ils ont rencontré pendant ce jour qui a la force la plus élevée, tout en favorisant leur actuel leader. Ainsi, même si le leader perd un combat face à un de ses concurrents, il n'est pas certain que la hierarchie change complètement. Les singes ont donc un comportement grégaire, d'une part pour donner leur salut, mais également pour en recevoir.
+Pour la fluidité de la simulation, un jour est représenté par un certain nombre de ticks, les singes ont un salut par jour, qu'ils choisiront de donner à celui qui leur semble le mériter le plus, c'est à dire le singe  qu'ils ont rencontré pendant ce jour qui a la force la plus élevée, tout en favorisant leur actuel leader. Ainsi, même si le leader perd un combat face à un de ses concurrents, il n'est pas certain que la hierarchie change complètement. Les singes ont également un comportement grégaire, d'une part pour pouvoir donner leur salut, mais également pour en recevoir.
 
 ## COMMENT L'UTILISER ?
 
@@ -608,15 +608,15 @@ Pour la fluidité de la simulation, un jour est représenté par un certain nomb
 
 * strength-per-salut est le boost d'ego que recevra le singe lorsqu'il recoit un salut
 
-* ticks-per-day nombre de ticks par jour
+* ticks-per-day est le nombre de ticks par jour
 
-* memory-of-strength-decay est la vitesse à laquelle ils vont perdre leur confiance en eux s'ils ne recoivent pas de salut, mais c'est également la vitesse à laquelle la mémoire de la force de leur leader diminue
+* memory-of-strength-decay est la vitesse à laquelle ils vont perdre leur confiance en eux s'ils ne recoivent pas de salut, et c'est également la vitesse à laquelle la mémoire de la force de leur leader diminue
 
 * time-as-leader est le plot qui permet de visualiser, en pourcentage, le temps que chaque singe (représenté par sa couleur) a passé en temps que leader du groupe
 
 * Strength est le plot qui montre la force de chaque chimpanzé (représenté par sa couleur)
 
-* display-relations? permet d'afficher, ou non, les relations entre singes, l'affichage et le calcul est très couteux en temps de calcul et si l'option est activé il devient alors impossible (trop long) de mener la simulation à son terme pour en extraire des résultats.
+* display-relations? permet d'afficher, ou non, les relations entre singes, l'affichage et le calcul est très couteux en temps de calcul et si l'option est activée il devient alors impossible (trop long) de mener la simulation à son terme pour en extraire des résultats.
 
 * Saluts est le pourcentage des saluts qu'à reçu un singe chaque jour
 
@@ -630,7 +630,7 @@ Pour la fluidité de la simulation, un jour est représenté par un certain nomb
 
 On peut voir que le role de leader peut alterner entre plusieurs singes, mais que c'est toujours des singes avec des caractéristiques élevées qui seront les leaders.
 
-On peut également noter que c'est le singe qui a le plus de respect de la part de la majorité du groupe qui est le leader, mais qu'il est possible qu'il y ai des singes
+On peut également noter que c'est le singe qui a le plus de respect de la part de la majorité du groupe qui est le leader, mais qu'il est possible qu'il y ai des singes qui ne montre pas de respect envers le leader.
 
 ![alt text](./relations.png)
 
