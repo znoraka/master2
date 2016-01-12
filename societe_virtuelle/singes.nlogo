@@ -401,7 +401,7 @@ SLIDER
 initial-monkeys
 initial-monkeys
 2
-100
+15
 9
 1
 1
@@ -568,7 +568,7 @@ simulations-count
 simulations-count
 1
 100
-37
+36
 1
 1
 NIL
@@ -590,6 +590,57 @@ NIL
 HORIZONTAL
 
 @#$#@#$#@
+## QU'EST CE QUE C'EST ?
+
+C'est la simulation des interactions entre les individus au sein d'un groupe de chimpanzés. L'accent est mis sur le "respect" des individus entre eux, où l'individu le plus respecté sera le leader du groupe. Les chimpanzés sont en effet sociaux, et on peut voir émerger de leurs interactions une véritable société, au sens humain du terme, où chaque individu a sa place, soit acquise à la naissance, soit en ayant monté les échelons de la société. Nous tenterons de représenter l'évolution du respect que se porte les individus entre eux, et l'emergence d'un leader.
+
+## COMMENT ÇA MARCHE ?
+
+Les singes, nos tortues, ont chacuns deux caractéristiques, décidées aléatoirement lors de leur création. Le charisme, qui incitera les autres singes à le saluer, et l'abilité au combat, qui derterminera qui sortira vainqueur en cas d'affrontement entre deux singes. C'est donc normalement le singe qui a les caractéristiques les plus élevées qui recevra le plus de salut.
+
+Chaque salut augmente la force du singe, c'est un peu sa confiance en soi, qui diminue petit à petit s'il ne reçoit pas de salut. Ainsi, pour qu'un singe ai confiance en lui, il faut qu'il soit continuellement salué. Un singe ne sera salué par un autre singe que si sa force est plus importante, en prenant en compte le charisme. Dans une société de chimpanzés, lorsque deux individus sont trop proches en rang, des rivalités peuvent se créer, elle seront souvent réglées par un affrontement, l'issue de l'affrontement est déterminé par l'abilité au combat de chacun, ainsi qu'un peu de random. Le vaincu perd de la confiance en soi (de la force) tandis que celle du vainqueur est boostée, on a ainsi un clair vainqueur qui en sort, et qui pourra potentiellement être le leader du groupe.
+
+Pour la fluidité de la simulation, un jour est représenté par un certain nombre de ticks, les singes ont un salut par jour, qu'ils choisirons de donner à celui qui leur semble le mériter le plus, c'est à dire le singe  qu'ils ont rencontré pendant ce jour qui a la force la plus élevée, tout en favorisant leur actuel leader. Ainsi, même si le leader perd un combat face à un de ses concurrents, il n'est pas certain que la hierarchie change complètement. Les singes ont donc un comportement grégaire, d'une part pour donner leur salut, mais également pour en recevoir.
+
+## COMMENT L'UTILISER ?
+
+* init-monkeys est le nombre de singes au setup, il est conseillé d'en mettre entre 7 et 12, c'est là que les résultats seront les plus significatifs tout en restant lisibles.
+
+* strength-per-salut est le boost d'ego que recevra le singe lorsqu'il recoit un salut
+
+* ticks-per-day nombre de ticks par jour
+
+* memory-of-strength-decay est la vitesse à laquelle ils vont perdre leur confiance en eux s'ils ne recoivent pas de salut, mais c'est également la vitesse à laquelle la mémoire de la force de leur leader diminue
+
+* time-as-leader est le plot qui permet de visualiser, en pourcentage, le temps que chaque singe (représenté par sa couleur) a passé en temps que leader du groupe
+
+* Strength est le plot qui montre la force de chaque chimpanzé (représenté par sa couleur)
+
+* display-relations? permet d'afficher, ou non, les relations entre singes, l'affichage et le calcul est très couteux en temps de calcul et si l'option est activé il devient alors impossible (trop long) de mener la simulation à son terme pour en extraire des résultats.
+
+* Saluts est le pourcentage des saluts qu'à reçu un singe chaque jour
+
+* En dessous de l'affichage se trouvent quelques informations sur le leader actuel
+
+* simulation-count et ticks-per-simulation permettent de gérer la durée de la simulation pour en extraire les résultats, ils sont exportés dans un fichier lisible par gnuplot, avec un fichier de configuration fourni, se nommant "plot.gnu".
+
+* Dans la zone d'affichage, la visualisation du déplacement des singes n'est pas très pertinente, l'affichage des relations entre les singes est quant à elle beaucoup plus intéressante. Cela représente le respect que chaque singe a pour tous les autres, avec dans la même couleur, le respect que les singes ont pour le singe de cette couleur.
+
+## LES CHOSES À NOTER
+
+On peut voir que le role de leader peut alterner entre plusieurs singes, mais que c'est toujours des singes avec des caractéristiques élevées qui seront les leaders.
+
+On peut également noter que c'est le singe qui a le plus de respect de la part de la majorité du groupe qui est le leader, mais qu'il est possible qu'il y ai des singes
+
+![alt text](./relations.png)
+
+En analysant les résultats des simulations (environ 65 simulations de 30 000 ticks), on peut noter plusieurs choses.
+
+![alt text](./combat-ability.png)
+
+![alt text](./charisma.png)
+
+On peut remarquer que le charisme est bien plus important que l'abilité au combat, en effet les singes qui ont passé du temps en tant que leader peuvent avoir une abilité au combat assez faible alors qu'il n'y a aucun leader ayant un charisme inferieur à la moyenne.
 @#$#@#$#@
 default
 true
